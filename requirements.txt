@@ -1,2 +1,5 @@
 streamlit
-pandas
+meteostat
+geopy
+plotly
+matplotlib
