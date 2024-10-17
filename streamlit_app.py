@@ -60,7 +60,7 @@ if address:
     st.write("Adresse saisie : ", address)  # Vérification de l'entrée utilisateur
 
     # Obtenir la latitude et la longitude à partir de l'adresse
-    lat, lon, alt = get_coordinates(address)
+    lat, lon = get_coordinates(address)
     
     if lat is not None and lon is not None:
         st.write(f"Adresse trouvée : Latitude = {lat}, Longitude = {lon}")
