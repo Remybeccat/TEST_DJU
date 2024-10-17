@@ -14,7 +14,7 @@ def get_coordinates(address):
     try:
         location = geolocator.geocode(address)
         if location:
-            return location.latitude, location.longitude
+            return location.latitude, location.longitude, location.altitude
         else:
             return None, None
     except (GeocoderUnavailable, GeocoderTimedOut) as e:
@@ -60,10 +60,10 @@ if address:
     st.write("Adresse saisie : ", address)  # Vérification de l'entrée utilisateur
 
     # Obtenir la latitude et la longitude à partir de l'adresse
-    lat, lon = get_coordinates(address)
+    lat, lon, alt = get_coordinates(address)
     
     if lat is not None and lon is not None:
-        st.write(f"Adresse trouvée : Latitude = {lat}, Longitude = {lon}")
+        st.write(f"Adresse trouvée : Latitude = {lat}, Longitude = {lon}, Altitude = {alt}")
 
         # Obtenir les stations météo les plus proches
         nearby_stations = get_nearby_stations(lat, lon)
