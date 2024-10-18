@@ -128,6 +128,7 @@ if address:
                 dju_meteo = calculate_dju_meteo(data, reference_temp)
                 dju_costic = calculate_dju_costic(data, reference_temp)
                 st.write(f"Le total des DJU méthode météo pour l'année {year} est : {dju_meteo:.2f}")
+                st.write(f"Le total des DJU méthode COSTIC pour l'année {year} est : {dju_costic:.2f}")
 
                 # Créer un graphique des températures min, moy et max
                 plt.figure(figsize=(10, 6))
