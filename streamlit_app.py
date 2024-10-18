@@ -47,8 +47,28 @@ def get_weather_data(station_id, start, end):
     return data
 
 # Fonction pour calculer les DJU (Degré Jour Unifié)
-def calculate_dju(data, reference_temp):
+def calculate_dju_meteo(data, reference_temp):
     dju = data.apply(lambda row: max(0, reference_temp - row['tavg']) if pd.notnull(row['tavg']) else 0, axis=1)
+    return dju.sum()
+
+def calculate_dju_costic(data, reference_temp):
+    def costic_dju(row, reference_temp):
+        t_min = row['tmin']
+        t_max = row['tmax']
+        
+        # Si la référence est supérieure à la température maximale, on retourne DJU = 0
+        if reference_temp > t_max:
+            return 0
+        # Si la référence est inférieure à la température minimale, on retourne la différence
+        elif reference_temp < t_min:
+            return reference_temp - t_min
+        # Si la référence est entre t_min et t_max, on utilise la formule Costic
+        else:
+            return (reference_temp - t_min) * (0.08 + 0.42 * (reference_temp - t_min) / (t_max - t_min))
+    
+    # Applique la fonction costic_dju à chaque ligne des données
+    dju = data.apply(lambda row: costic_dju(row, reference_temp), axis=1)
+    
     return dju.sum()
 
 st.title('Analyse Météo avec Meteostat et Streamlit')
@@ -105,8 +125,9 @@ if address:
                 reference_temp = st.number_input("Entrez la température de référence pour calculer les DJU :", min_value=-30.0, max_value=50.0, value=18.0)
 
                 # Calculer les DJU
-                dju = calculate_dju(data, reference_temp)
-                st.write(f"Le total des DJU pour l'année {year} est : {dju:.2f}")
+                dju_meteo = calculate_dju_meteo(data, reference_temp)
+                dju_costic = calculate_dju_costic(data, reference_temp)
+                st.write(f"Le total des DJU méthode météo pour l'année {year} est : {dju_meteo:.2f}")
 
                 # Créer un graphique des températures min, moy et max
                 plt.figure(figsize=(10, 6))
