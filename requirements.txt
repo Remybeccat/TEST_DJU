@@ -3,3 +3,4 @@ meteostat
 geopy
 plotly
 matplotlib
+datetime
