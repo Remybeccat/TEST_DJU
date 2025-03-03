@@ -1,10 +1,11 @@
 import streamlit as st
-from meteostat import Stations, Daily
+from meteostat import Stations, Daily, Hourly
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderUnavailable, GeocoderTimedOut
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+from datetime import datetime
 
 st.write("L'application a démarré")  # Vérification initiale
 
@@ -40,9 +41,15 @@ def get_nearby_stations(latitude, longitude):
     nearby_stations = stations.nearby(latitude, longitude).fetch(5)
     return nearby_stations
 
-# Fonction pour récupérer les données météorologiques d'une station donnée via son id
+# Fonction pour récupérer les données météorologiques journalières d'une station donnée via son id
 def get_weather_data(station_id, start, end):
     data = Daily(station_id, start, end)
+    data = data.fetch()
+    return data
+
+# Fonction pour récupérer les données météorologiques horaires d'une station donnée via son id
+def get_weather_data_hourly(station_id, start, end):
+    data = Hourly(station_id, start, end)
     data = data.fetch()
     return data
 
@@ -114,10 +121,14 @@ if address:
             selected_station_id = nearby_stations.loc[nearby_stations['name'] == selected_station_name].index[0]
 
             # Récupérer les données météorologiques
-            start_date = f"{year}-01-01"
-            end_date = f"{year}-12-31"
-            data = get_weather_data(selected_station_id, start_date, end_date)
+            #start_date = f"{year}-01-01"
+            #end_date = f"{year}-12-31"
+            start_date = datetime(year, 1, 1)
+            end_date = datetime(year, 12, 31)
+            end_date_hour = datetime(year, 12, 31, 23, 59)
 
+            # donées journalières
+            data = get_weather_data(selected_station_id, start_date, end_date)
             if not data.empty:
                 st.write(f"Données météo pour {selected_station_name} en {year}")
                 st.dataframe(data)
@@ -146,6 +157,27 @@ if address:
                 st.pyplot(plt)
             else:
                 st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' en {year}.")
+
+
+            # données horaires
+            data_hour = get_weather_data_hourly(selected_station_id, start_date, end_date_hour)    
+            if not data_hour.empty:
+                st.write(f"Données météo horaires pour {selected_station_name} en {year}")
+                st.dataframe(data_hour)
+
+
+                # Créer un graphique des températures min, moy et max
+                plt.figure(figsize=(10, 6))
+                plt.plot(data_hour.index, data_hour['temp'], color='blue', label='Température (°C)')
+                plt.title(f'Températures horaires pour {selected_station_name} en {year}')
+                plt.xlabel('Date')
+                plt.ylabel('Température (°C)')
+                plt.legend()
+
+                # Afficher le graphique
+                st.pyplot(plt)
+            else:
+                st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' en {year}.")    
         else:
             st.write("Aucune station météo trouvée à proximité.")
     else:
