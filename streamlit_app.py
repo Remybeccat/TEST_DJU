@@ -125,7 +125,7 @@ if address:
             # Récupérer les données météorologiques
             #start_date = f"{year}-01-01"
             #end_date = f"{year}-12-31"
-            start_date = datetime(year, 1, 1)
+            start_date = datetime.datetime(year, 1, 1)
             end_date = datetime(year, 12, 31)
             end_date_hour = datetime(year, 12, 31, 23, 59)
 
