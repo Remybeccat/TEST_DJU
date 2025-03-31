@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 import math
 from datetime import datetime
 
-year = datetime.date.today()
-year = year.year
 st.write("L'application a démarré")  # Vérification initiale
 
 # Fonction pour obtenir la latitude et la longitude à partir de l'adresse
@@ -117,7 +115,9 @@ if address:
             selected_station_name = st.selectbox("Sélectionnez une station :", nearby_stations['name'])
 
             # Sélectionner l'année
-            year = st.number_input("Sélectionnez une année :", min_value=2000, max_value=year, value=year - 1)
+            year_max = datetime.date.today()
+            year_max = year_max.year
+            year = st.number_input("Sélectionnez une année :", min_value=2000, max_value=year_max, value=year_max - 1)
 
             # Récupérer l'ID de la station sélectionnée
             selected_station_id = nearby_stations.loc[nearby_stations['name'] == selected_station_name].index[0]
