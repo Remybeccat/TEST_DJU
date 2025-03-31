@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 from datetime import datetime
+from datetime import date
 
 st.write("L'application a démarré")  # Vérification initiale
 
