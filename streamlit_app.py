@@ -5,7 +5,7 @@ from geopy.exc import GeocoderUnavailable, GeocoderTimedOut
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
-from datetime
+import datetime
 
 st.write("L'application a démarré")  # Vérification initiale
 
