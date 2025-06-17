@@ -189,29 +189,16 @@ if address:
             
             if not data_hour.empty:
                 st.write(f"Données météo horaires pour {selected_station_name} en {year}")
-                chart = alt.Chart(data.reset_index()).mark_line().encode(
-                    x='time:T',
-                    y='temp:Q',
-                    tooltip=['time:T', 'temp:Q']
-                ).properties(
-                    title=f'Température horaire - {selected_station_name} ({year})',
-                    width=700
-                )
-                st.altair_chart(chart, use_container_width=True)
-                
-                #st.dataframe(data_hour)
-
-
+                st.dataframe(data_hour)
                 # Créer un graphique des températures min, moy et max
-                #plt.figure(figsize=(10, 6))
-                #plt.plot(data_hour.index, data_hour['temp'], color='blue', label='Température (°C)')
-                #plt.title(f'Températures horaires pour {selected_station_name} en {year}')
-                #plt.xlabel('Date')
-                #plt.ylabel('Température (°C)')
-                #plt.legend()
-
+                plt.figure(figsize=(10, 6))
+                plt.plot(data_hour.index, data_hour['temp'], color='blue', label='Température (°C)')
+                plt.title(f'Températures horaires pour {selected_station_name} en {year}')
+                plt.xlabel('Date')
+                plt.ylabel('Température (°C)')
+                plt.legend()
                 # Afficher le graphique
-                #st.pyplot(plt)
+                st.pyplot(plt)
             else:
                 st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' en {year}.")    
         else:
