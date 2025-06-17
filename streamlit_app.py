@@ -130,7 +130,8 @@ if address:
             
             # Sélectionner une station par nom
             selected_station_name = st.selectbox("Sélectionnez une station :", nearby_stations['name'])
-
+            st.map(pd.DataFrame({'lat': [lat], 'lon': [lon]}))
+            
             # Sélectionner l'année
             year_max = datetime.date.today()
             year_max = year_max.year
