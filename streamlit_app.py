@@ -195,7 +195,7 @@ if address:
                 #plt.legend()
 
                 # Afficher le graphique
-                {st.pyplot(plt)
+                #st.pyplot(plt)
             else:
                 st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' en {year}.")    
         else:
