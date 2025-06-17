@@ -4,4 +4,4 @@ geopy
 plotly
 matplotlib
 datetime
-opencage.geocode
+opencage
