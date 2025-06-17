@@ -7,21 +7,37 @@ import matplotlib.pyplot as plt
 import math
 import datetime
 import altair as alt
+from opencage.geocoder import OpenCageGeocode
+
 
 st.write("L'application a démarré")  # Vérification initiale
 
 # Fonction pour obtenir la latitude et la longitude à partir de l'adresse
+#def get_coordinates_old(address):
+#    geolocator = Nominatim(user_agent="weather_app", timeout=10)  # Augmenter le délai d'attente
+#    try:
+#        location = geolocator.geocode(address)
+#        if location:
+#            return location.latitude, location.longitude
+#        else:
+#            return None, None
+#    except (GeocoderUnavailable, GeocoderTimedOut) as e:
+#        st.error(f"Erreur de géolocalisation : {str(e)}. Veuillez réessayer plus tard.")
+#        return None, None
+
 def get_coordinates(address):
-    geolocator = Nominatim(user_agent="weather_app", timeout=10)  # Augmenter le délai d'attente
+    key = "b9d04993bd4e471ab7a210c42585b523"
+    geocoder = OpenCageGeocode(key)
     try:
-        location = geolocator.geocode(address)
-        if location:
-            return location.latitude, location.longitude
+        results = geocoder.geocode(address)
+        if results and len(results):
+            return results[0]['geometry']['lat'], results[0]['geometry']['lng']
         else:
             return None, None
-    except (GeocoderUnavailable, GeocoderTimedOut) as e:
-        st.error(f"Erreur de géolocalisation : {str(e)}. Veuillez réessayer plus tard.")
+    except Exception as e:
+        st.error(f"Erreur OpenCage : {str(e)}")
         return None, None
+
 
 # Fonction pour calculer la distance entre deux points géographiques (en km)
 def haversine(lat1, lon1, lat2, lon2):
