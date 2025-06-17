@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 import datetime
+import altair as alt
 
 st.write("L'application a démarré")  # Vérification initiale
 
@@ -139,45 +140,62 @@ if address:
                 reference_temp = st.number_input("Entrez la température de référence pour calculer les DJU :", min_value=-30.0, max_value=50.0, value=18.0)
 
                 # Calculer les DJU
-                dju_meteo = calculate_dju_meteo(data, reference_temp)
-                dju_costic = calculate_dju_costic(data, reference_temp)
-                st.write(f"Le total des DJU méthode météo pour l'année {year} est : {dju_meteo:.2f}")
-                st.write(f"Le total des DJU méthode COSTIC pour l'année {year} est : {dju_costic:.2f}")
-
-                # Créer un graphique des températures min, moy et max
-                plt.figure(figsize=(10, 6))
-                plt.plot(data.index, data['tmin'], color='blue', label='Température Min (°C)')
-                plt.plot(data.index, data['tavg'], color='black', label='Température Moy (°C)')
-                plt.plot(data.index, data['tmax'], color='red', label='Température Max (°C)')
-                plt.fill_between(data.index, data['tmin'], data['tmax'], color='gray', alpha=0.1)
-                plt.title(f'Températures Min, Moy et Max pour {selected_station_name} en {year}')
-                plt.xlabel('Date')
-                plt.ylabel('Température (°C)')
-                plt.legend()
-
-                # Afficher le graphique
-                st.pyplot(plt)
+                required_cols = ['tmin', 'tavg', 'tmax']
+                if all(col in data.columns for col in required_cols):
+                    # calculs DJU et graphiques
+                    dju_meteo = calculate_dju_meteo(data, reference_temp)
+                    dju_costic = calculate_dju_costic(data, reference_temp)
+                    st.write(f"Le total des DJU méthode météo pour l'année {year} est : {dju_meteo:.2f}")
+                    st.write(f"Le total des DJU méthode COSTIC pour l'année {year} est : {dju_costic:.2f}")
+    
+                    # Créer un graphique des températures min, moy et max
+                    plt.figure(figsize=(10, 6))
+                    plt.plot(data.index, data['tmin'], color='blue', label='Température Min (°C)')
+                    plt.plot(data.index, data['tavg'], color='black', label='Température Moy (°C)')
+                    plt.plot(data.index, data['tmax'], color='red', label='Température Max (°C)')
+                    plt.fill_between(data.index, data['tmin'], data['tmax'], color='gray', alpha=0.1)
+                    plt.title(f'Températures Min, Moy et Max pour {selected_station_name} en {year}')
+                    plt.xlabel('Date')
+                    plt.ylabel('Température (°C)')
+                    plt.legend()
+    
+                    # Afficher le graphique
+                    st.pyplot(plt)        
+                else:
+                        st.warning("Les données météo sont incomplètes pour les calculs.")
             else:
                 st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' en {year}.")
 
 
             # données horaires
-            data_hour = get_weather_data_hourly(selected_station_id, start_date, end_date_hour)    
+            with st.spinner("Chargement des données horaires..."):
+                data_hour = get_weather_data_hourly(selected_station_id, start_date, end_date_hour)   
+            
             if not data_hour.empty:
                 st.write(f"Données météo horaires pour {selected_station_name} en {year}")
-                st.dataframe(data_hour)
+                chart = alt.Chart(data.reset_index()).mark_line().encode(
+                    x='time:T',
+                    y='temp:Q',
+                    tooltip=['time:T', 'temp:Q']
+                ).properties(
+                    title=f'Température horaire - {selected_station_name} ({year})',
+                    width=700
+                )
+                st.altair_chart(chart, use_container_width=True)
+                
+                #st.dataframe(data_hour)
 
 
                 # Créer un graphique des températures min, moy et max
-                plt.figure(figsize=(10, 6))
-                plt.plot(data_hour.index, data_hour['temp'], color='blue', label='Température (°C)')
-                plt.title(f'Températures horaires pour {selected_station_name} en {year}')
-                plt.xlabel('Date')
-                plt.ylabel('Température (°C)')
-                plt.legend()
+                #plt.figure(figsize=(10, 6))
+                #plt.plot(data_hour.index, data_hour['temp'], color='blue', label='Température (°C)')
+                #plt.title(f'Températures horaires pour {selected_station_name} en {year}')
+                #plt.xlabel('Date')
+                #plt.ylabel('Température (°C)')
+                #plt.legend()
 
                 # Afficher le graphique
-                st.pyplot(plt)
+                {st.pyplot(plt)
             else:
                 st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' en {year}.")    
         else:
