@@ -149,22 +149,22 @@ if address:
             #end_date = datetime.datetime(year, 12, 31)
             #end_date_hour = datetime.datetime(year, 12, 31, 23, 59)
             
-            start_date = st.date_input("Selectionner la date de début", datetime.datetime(year_max-1, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")
-            end_date = st.date_input("Selectionner la date de fin", datetime.datetime(year_max, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")    
+            start_date_FR = st.date_input("Selectionner la date de début", datetime.datetime(year_max-1, 1, 1), min_value=None, max_value=datetime.date.today(), format="DD/MM/YYYY")
+            end_date_FR = st.date_input("Selectionner la date de fin", datetime.datetime(year_max, 1, 1), min_value=None, max_value=datetime.date.today(), format="DD/MM/YYYY")    
 
             start_date = datetime.datetime(
-                start_date.year,
-                start_date.month,
-                start_date.day)
+                start_date_FR.year,
+                start_date_FR.month,
+                start_date_FR.day)
             end_date = datetime.datetime(
-                end_date.year,
-                end_date.month,
-                end_date.day)
+                end_date_FR.year,
+                end_date_FR.month,
+                end_date_FR.day)
             
             end_date_hour = datetime.datetime(
-                end_date.year,
-                end_date.month,
-                end_date.day,
+                end_date_FR.year,
+                end_date_FR.month,
+                end_date_FR.day,
                 23,
                 59)
             
