@@ -149,16 +149,18 @@ if address:
             end_date = datetime.datetime(year, 12, 31)
             end_date_hour = datetime.datetime(year, 12, 31, 23, 59)
 
-            start_date = datetime.datetime(2020, 1, 1)
-            end_date = start_date + datetime.timedelta(weeks=1)
-             
-            selected_date = st.slider(
-                "Sélectionnez une plage de dates",
-                min_value=start_date,
-                max_value=end_date,
-                value=(start_date, end_date),
-                step=datetime.timedelta(days=1),
-            )
+            today = datetime.datetime.now()
+            previous_year = today.year - 1
+            jan_1 = datetime.date(previous_year, 1, 1)
+            dec_31 = datetime.date(previous_year, 12, 31)
+            
+            d = st.date_input(
+                "Selectionner la période à afficher",
+                (jan_1, datetime.date(next_year, 1, 7)),
+                jan_1,
+                dec_31,
+                format="MM.DD.YYYY",
+                )
             
             # donées journalières
             data = get_weather_data(selected_station_id, start_date, end_date)
