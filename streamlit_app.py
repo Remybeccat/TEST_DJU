@@ -171,7 +171,7 @@ if address:
             # donées journalières
             data = get_weather_data(selected_station_id, start_date, end_date)
             if not data.empty:
-                st.write(f"Données météo pour {selected_station_name} en {year}")
+                st.write(f"Données météo pour {selected_station_name} du {start_date} au {end_date}")
                 st.dataframe(data)
 
                 # Demander à l'utilisateur de saisir une température de référence pour calculer les DJU
@@ -202,7 +202,7 @@ if address:
                 else:
                         st.warning("Les données météo sont incomplètes pour les calculs.")
             else:
-                st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' en {year}.")
+                st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' du {start_date} au {end_date}.")
 
 
             # données horaires
@@ -210,19 +210,19 @@ if address:
                 data_hour = get_weather_data_hourly(selected_station_id, start_date, end_date_hour)   
             
             if not data_hour.empty:
-                st.write(f"Données météo horaires pour {selected_station_name} en {year}")
+                st.write(f"Données météo horaires pour {selected_station_name} du {start_date} au {end_date}")
                 st.dataframe(data_hour)
                 # Créer un graphique des températures min, moy et max
                 plt.figure(figsize=(10, 6))
                 plt.plot(data_hour.index, data_hour['temp'], color='blue', label='Température (°C)')
-                plt.title(f'Températures horaires pour {selected_station_name} en {year}')
+                plt.title(f'Températures horaires pour {selected_station_name} du {start_date} au {end_date}')
                 plt.xlabel('Date')
                 plt.ylabel('Température (°C)')
                 plt.legend()
                 # Afficher le graphique
                 st.pyplot(plt)
             else:
-                st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' en {year}.")    
+                st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' du {start_date} au {end_date}.")    
         else:
             st.write("Aucune station météo trouvée à proximité.")
     else:
