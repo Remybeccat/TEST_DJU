@@ -5,7 +5,6 @@ from geopy.exc import GeocoderUnavailable, GeocoderTimedOut
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
-import datetime
 from datetime import datetime, timedelta
 import altair as alt
 from opencage.geocoder import OpenCageGeocode
