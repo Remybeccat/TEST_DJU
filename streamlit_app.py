@@ -145,11 +145,10 @@ if address:
             # Récupérer les données météorologiques
             #start_date = f"{year}-01-01"
             #end_date = f"{year}-12-31"
-            start_date = datetime.datetime(year, 1, 1)
-            end_date = datetime.datetime(year, 12, 31)
-            end_date_hour = datetime.datetime(year, 12, 31, 23, 59)
-
-
+            #start_date = datetime.datetime(year, 1, 1)
+            #end_date = datetime.datetime(year, 12, 31)
+            #end_date_hour = datetime.datetime(year, 12, 31, 23, 59)
+            
             start_date = st.date_input("Selectionner la date de début", datetime.datetime(year_max-1, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")
             end_date = st.date_input("Selectionner la date de fin", datetime.datetime(year_max, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")    
             
