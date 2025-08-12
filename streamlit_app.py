@@ -153,9 +153,9 @@ if address:
             end_date = st.date_input("Selectionner la date de fin", datetime.datetime(year_max, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")    
             
             end_date_hour = datetime.datetime(
-                end_date.year(),
-                end_date.month(),
-                end_date.year(),
+                end_date.year,
+                end_date.month,
+                end_date.day,
                 23,
                 59)
             
