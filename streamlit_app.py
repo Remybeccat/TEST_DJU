@@ -183,7 +183,7 @@ if address:
                     # calculs DJU et graphiques
                     dju_meteo = calculate_dju_meteo(data, reference_temp)
                     dju_costic = calculate_dju_costic(data, reference_temp)
-                    st.write(f"Le total des DJU méthode météo pour la période du {start_date} au {end_date} est : {dju_meteo:.2f}")
+                    st.write(f"Le total des DJU méthode météo pour la période du {start_date_FR} au {end_date_FR} est : {dju_meteo:.2f}")
                     st.write(f"Le total des DJU méthode COSTIC pour la période du {start_date} au {end_date} est : {dju_costic:.2f}")
     
                     # Créer un graphique des températures min, moy et max
