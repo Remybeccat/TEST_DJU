@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 import datetime
-from datetime import timedelta
 import altair as alt
 from opencage.geocoder import OpenCageGeocode
 
@@ -150,15 +149,15 @@ if address:
             end_date = datetime.datetime(year, 12, 31)
             end_date_hour = datetime.datetime(year, 12, 31, 23, 59)
 
-            start_date = datetime(2020, 1, 1)
-            end_date = start_date + timedelta(weeks=1)
+            start_date = datetime.datetime(2020, 1, 1)
+            end_date = start_date + datetime.timedelta(weeks=1)
              
             selected_date = st.slider(
                 "Sélectionnez une plage de dates",
                 min_value=start_date,
                 max_value=end_date,
                 value=(start_date, end_date),
-                step=timedelta(days=1),
+                step=datetime.timedelta(days=1),
             )
             
             # donées journalières
