@@ -133,22 +133,15 @@ if address:
             
             # Sélectionner une station par nom
             selected_station_name = st.selectbox("Sélectionnez une station :", nearby_stations['name'])
-            
-            # Sélectionner l'année
+
+                        # Récupérer l'ID de la station sélectionnée
+            selected_station_id = nearby_stations.loc[nearby_stations['name'] == selected_station_name].index[0]
+                        
+            #Année max sélectionnable = année en cours
             year_max = datetime.date.today()
             year_max = year_max.year
-            # year = st.number_input("Sélectionnez une année :", min_value=2000, max_value=year_max, value=year_max - 1)
-
-            # Récupérer l'ID de la station sélectionnée
-            selected_station_id = nearby_stations.loc[nearby_stations['name'] == selected_station_name].index[0]
-
-            # Récupérer les données météorologiques
-            #start_date = f"{year}-01-01"
-            #end_date = f"{year}-12-31"
-            #start_date = datetime.datetime(year, 1, 1)
-            #end_date = datetime.datetime(year, 12, 31)
-            #end_date_hour = datetime.datetime(year, 12, 31, 23, 59)
             
+            # Sélectionner les dates de début et de fin       
             start_date_FR = st.date_input("Selectionner la date de début", datetime.datetime(year_max-1, 1, 1), min_value=None, max_value=datetime.date.today(), format="DD/MM/YYYY")
             end_date_FR = st.date_input("Selectionner la date de fin", datetime.datetime(year_max, 1, 1), min_value=None, max_value=datetime.date.today(), format="DD/MM/YYYY")    
 
@@ -168,10 +161,11 @@ if address:
                 23,
                 59)
             
+            # Récupérer les données météorologiques
             # donées journalières
             data = get_weather_data(selected_station_id, start_date, end_date)
             if not data.empty:
-                st.write(f"Données météo pour {selected_station_name} du {start_date} au {end_date}")
+                st.write(f"Données météo pour {selected_station_name} du {start_date_FR} au {end_date_FR}")
                 st.dataframe(data)
 
                 # Demander à l'utilisateur de saisir une température de référence pour calculer les DJU
@@ -184,7 +178,7 @@ if address:
                     dju_meteo = calculate_dju_meteo(data, reference_temp)
                     dju_costic = calculate_dju_costic(data, reference_temp)
                     st.write(f"Le total des DJU méthode météo pour la période du {start_date_FR} au {end_date_FR} est : {dju_meteo:.2f}")
-                    st.write(f"Le total des DJU méthode COSTIC pour la période du {start_date} au {end_date} est : {dju_costic:.2f}")
+                    st.write(f"Le total des DJU méthode COSTIC pour la période du {start_date_FR} au {end_date_FR} est : {dju_costic:.2f}")
     
                     # Créer un graphique des températures min, moy et max
                     plt.figure(figsize=(10, 6))
@@ -192,7 +186,7 @@ if address:
                     plt.plot(data.index, data['tavg'], color='black', label='Température Moy (°C)')
                     plt.plot(data.index, data['tmax'], color='red', label='Température Max (°C)')
                     plt.fill_between(data.index, data['tmin'], data['tmax'], color='gray', alpha=0.1)
-                    plt.title(f'Températures Min, Moy et Max pour {selected_station_name} du {start_date} au {end_date}')
+                    plt.title(f'Températures Min, Moy et Max pour {selected_station_name} du {start_date_FR} au {end_date_FR}')
                     plt.xlabel('Date')
                     plt.ylabel('Température (°C)')
                     plt.legend()
@@ -202,7 +196,7 @@ if address:
                 else:
                         st.warning("Les données météo sont incomplètes pour les calculs.")
             else:
-                st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' du {start_date} au {end_date}.")
+                st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' du {start_date_FR} au {end_date_FR}.")
 
 
             # données horaires
@@ -210,19 +204,19 @@ if address:
                 data_hour = get_weather_data_hourly(selected_station_id, start_date, end_date_hour)   
             
             if not data_hour.empty:
-                st.write(f"Données météo horaires pour {selected_station_name} du {start_date} au {end_date}")
+                st.write(f"Données météo horaires pour {selected_station_name} du {start_date_FR} au {end_date_FR}")
                 st.dataframe(data_hour)
                 # Créer un graphique des températures min, moy et max
                 plt.figure(figsize=(10, 6))
                 plt.plot(data_hour.index, data_hour['temp'], color='blue', label='Température (°C)')
-                plt.title(f'Températures horaires pour {selected_station_name} du {start_date} au {end_date}')
+                plt.title(f'Températures horaires pour {selected_station_name} du {start_date_FR} au {end_date_FR}')
                 plt.xlabel('Date')
                 plt.ylabel('Température (°C)')
                 plt.legend()
                 # Afficher le graphique
                 st.pyplot(plt)
             else:
-                st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' du {start_date} au {end_date}.")    
+                st.write(f"Aucune donnée disponible pour la station '{selected_station_name}' du {start_date_FR} au {end_date_FR}.")    
         else:
             st.write("Aucune station météo trouvée à proximité.")
     else:
