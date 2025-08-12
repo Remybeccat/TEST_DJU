@@ -150,6 +150,17 @@ if address:
             end_date = datetime.datetime(year, 12, 31)
             end_date_hour = datetime.datetime(year, 12, 31, 23, 59)
 
+            start_date = datetime(2020, 1, 1)
+            end_date = start_date + timedelta(weeks=1)
+             
+            selected_date = st.slider(
+                "Sélectionnez une plage de dates",
+                min_value=start_date,
+                max_value=end_date,
+                value=(start_date, end_date),
+                step=timedelta(days=1),
+            )
+            
             # donées journalières
             data = get_weather_data(selected_station_id, start_date, end_date)
             if not data.empty:
