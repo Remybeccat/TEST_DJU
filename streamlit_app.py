@@ -72,7 +72,7 @@ def get_weather_data_hourly(station_id, start, end):
 
 # Fonction pour calculer les DJU (Degré Jour Unifié)
 def calculate_dju_meteo(data, reference_temp):
-    dju = data.apply(lambda row: max(0, reference_temp - (row['tmin']+row['tmoy'])/2) if pd.notnull(row['tmin']) and if pd.notnull(row['tmax']) else 0, axis=1)
+    dju = data.apply(lambda row: max(0, reference_temp - (row['tmin']+row['tmoy'])/2) if pd.notnull(row['tmin']) elif pd.notnull(row['tmax']) else 0, axis=1)
     return dju.sum()
 
 def calculate_dju_costic(data, reference_temp):
