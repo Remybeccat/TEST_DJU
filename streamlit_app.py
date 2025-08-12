@@ -156,7 +156,7 @@ if address:
             
             d = st.date_input(
                 "Selectionner la période à afficher",
-                (jan_1, datetime.date(next_year, 1, 7)),
+                (jan_1, datetime.date(previous_year, 1, 7)),
                 jan_1,
                 dec_31,
                 format="MM.DD.YYYY",
