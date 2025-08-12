@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 import datetime
-import timedelta
+from datetime import timedelta
 import altair as alt
 from opencage.geocoder import OpenCageGeocode
 
