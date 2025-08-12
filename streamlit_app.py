@@ -81,14 +81,17 @@ def calculate_dju_costic(data, reference_temp):
         t_max = row['tmax']
         t_moy = row['tavg']
         
+        #si tmax ou tmin est vide, on retourne DJU = 0
+        if pd.null(row['tmax']) or pd.null(row['tmin'])
+            return 0
         # Si la référence est supérieure à la température maximale, on retourne DJU = 0
-        if reference_temp > t_max:
+        elif reference_temp > t_max :
             return reference_temp - (t_max + t_min)/2
         # Si la référence est inférieure à la température minimale, on retourne la différence
-        elif reference_temp < t_min:
+        elif reference_temp < t_min :
             return 0
         # Si la référence est entre t_min et t_max, on utilise la formule Costic
-        else:
+        else
             return (reference_temp - t_min) * (0.08 + 0.42 * (reference_temp - t_min) / (t_max - t_min))
     
     # Applique la fonction costic_dju à chaque ligne des données
