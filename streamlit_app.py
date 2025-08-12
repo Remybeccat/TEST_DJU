@@ -150,7 +150,8 @@ if address:
             end_date_hour = datetime.datetime(year, 12, 31, 23, 59)
 
 
-            d = st.date_input("Selectionner la date de début", value="today", min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")     
+            d = st.date_input("Selectionner la date de début", datetime.datetime(year_max-1, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")
+            d = st.date_input("Selectionner la date de fin", value="today", min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")    
             
             # donées journalières
             data = get_weather_data(selected_station_id, start_date, end_date)
