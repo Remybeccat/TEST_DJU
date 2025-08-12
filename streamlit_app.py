@@ -183,8 +183,8 @@ if address:
                     # calculs DJU et graphiques
                     dju_meteo = calculate_dju_meteo(data, reference_temp)
                     dju_costic = calculate_dju_costic(data, reference_temp)
-                    st.write(f"Le total des DJU méthode météo pour l'année {year} est : {dju_meteo:.2f}")
-                    st.write(f"Le total des DJU méthode COSTIC pour l'année {year} est : {dju_costic:.2f}")
+                    st.write(f"Le total des DJU méthode météo pour la période du {start_date} au {end_date} est : {dju_meteo:.2f}")
+                    st.write(f"Le total des DJU méthode COSTIC pour la période du {start_date} au {end_date} est : {dju_costic:.2f}")
     
                     # Créer un graphique des températures min, moy et max
                     plt.figure(figsize=(10, 6))
@@ -192,7 +192,7 @@ if address:
                     plt.plot(data.index, data['tavg'], color='black', label='Température Moy (°C)')
                     plt.plot(data.index, data['tmax'], color='red', label='Température Max (°C)')
                     plt.fill_between(data.index, data['tmin'], data['tmax'], color='gray', alpha=0.1)
-                    plt.title(f'Températures Min, Moy et Max pour {selected_station_name} en {year}')
+                    plt.title(f'Températures Min, Moy et Max pour {selected_station_name} du {start_date} au {end_date}')
                     plt.xlabel('Date')
                     plt.ylabel('Température (°C)')
                     plt.legend()
