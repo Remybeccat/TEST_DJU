@@ -151,6 +151,15 @@ if address:
             
             start_date = st.date_input("Selectionner la date de début", datetime.datetime(year_max-1, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")
             end_date = st.date_input("Selectionner la date de fin", datetime.datetime(year_max, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")    
+
+            start_date = datetime.datetime(
+                start_date.year,
+                start_date.month,
+                start_date.day)
+            end_date = datetime.datetime(
+                end_date.year,
+                end_date.month,
+                end_date.day)
             
             end_date_hour = datetime.datetime(
                 end_date.year,
