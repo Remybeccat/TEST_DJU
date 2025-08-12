@@ -137,7 +137,7 @@ if address:
             # Sélectionner l'année
             year_max = datetime.date.today()
             year_max = year_max.year
-            year = st.number_input("Sélectionnez une année :", min_value=2000, max_value=year_max, value=year_max - 1)
+            'year = st.number_input("Sélectionnez une année :", min_value=2000, max_value=year_max, value=year_max - 1)
 
             # Récupérer l'ID de la station sélectionnée
             selected_station_id = nearby_stations.loc[nearby_stations['name'] == selected_station_name].index[0]
@@ -150,8 +150,15 @@ if address:
             end_date_hour = datetime.datetime(year, 12, 31, 23, 59)
 
 
-            d = st.date_input("Selectionner la date de début", datetime.datetime(year_max-1, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")
-            d = st.date_input("Selectionner la date de fin", value="today", min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")    
+            start_date = st.date_input("Selectionner la date de début", datetime.datetime(year_max-1, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")
+            end_date = st.date_input("Selectionner la date de fin", datetime.datetime(year_max, 1, 1), min_value=None, max_value=datetime.date.today(), format="YYYY/MM/DD")    
+            
+            end_date_hour = datetime.datetime(
+                end_date.year(),
+                end_date.month(),
+                end_date.year(),
+                23,
+                59)
             
             # donées journalières
             data = get_weather_data(selected_station_id, start_date, end_date)
