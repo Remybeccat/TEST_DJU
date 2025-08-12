@@ -91,7 +91,7 @@ def calculate_dju_costic(data, reference_temp):
         elif reference_temp < t_min :
             return 0
         # Si la référence est entre t_min et t_max, on utilise la formule Costic
-        else
+        else :
             return (reference_temp - t_min) * (0.08 + 0.42 * (reference_temp - t_min) / (t_max - t_min))
     
     # Applique la fonction costic_dju à chaque ligne des données
