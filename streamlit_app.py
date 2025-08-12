@@ -82,7 +82,7 @@ def calculate_dju_costic(data, reference_temp):
         t_moy = row['tavg']
         
         #si tmax ou tmin est vide, on retourne DJU = 0
-        if pd.null(row['tmax']) or pd.null(row['tmin']) :
+        if pd.isnull(row['tmax']) or pd.isnull(row['tmin']) :
             return 0
         # Si la référence est supérieure à la température maximale, on retourne DJU = 0
         elif reference_temp > t_max :
