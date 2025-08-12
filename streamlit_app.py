@@ -149,16 +149,11 @@ if address:
             end_date = datetime.datetime(year, 12, 31)
             end_date_hour = datetime.datetime(year, 12, 31, 23, 59)
 
-            today = datetime.datetime.now()
-            previous_year = today.year - 1
-            jan_1 = datetime.date(previous_year, 1, 1)
-            dec_31 = datetime.date(previous_year, 12, 31)
-            
+
             d = st.date_input(
-                "Selectionner la période à afficher",
-                (jan_1, datetime.date(previous_year, 1, 7)),
-                jan_1,
-                dec_31,
+                "Selectionner la date de début",
+                (start_date,
+                end_date,
                 format="MM.DD.YYYY",
                 )
             
