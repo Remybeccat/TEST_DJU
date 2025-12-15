@@ -165,7 +165,7 @@ if address:
             # donées journalières
             data = get_weather_data(selected_station_id, start_date, end_date)
             if not data.empty:
-                st.write(f"Données météo pour {selected_station_name} du {start_date_FR} au {end_date_FR}")
+                st.write(f"Données météos journalières pour la station {selected_station_name} du {start_date_FR} au {end_date_FR}")
                 st.dataframe(data)
 
                 # Demander à l'utilisateur de saisir une température de référence pour calculer les DJU
@@ -204,7 +204,7 @@ if address:
                 data_hour = get_weather_data_hourly(selected_station_id, start_date, end_date_hour)   
             
             if not data_hour.empty:
-                st.write(f"Données météo horaires pour {selected_station_name} du {start_date_FR} au {end_date_FR}")
+                st.write(f"Données météos horaires pour la station {selected_station_name} du {start_date_FR} au {end_date_FR}")
                 st.dataframe(data_hour)
                 # Créer un graphique des températures min, moy et max
                 plt.figure(figsize=(10, 6))
