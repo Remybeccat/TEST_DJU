@@ -1,5 +1,6 @@
 import streamlit as st
-from meteostat import Stations, Daily, Hourly
+# from meteostat import Stations, Daily, Hourly
+import meteostat as ms
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderUnavailable, GeocoderTimedOut
 import pandas as pd
@@ -54,19 +55,19 @@ def haversine(lat1, lon1, lat2, lon2):
 
 # Fonction pour obtenir les stations météo proches
 def get_nearby_stations(latitude, longitude):
-    stations = Stations()
+    stations = ms.Stations()
     nearby_stations = stations.nearby(latitude, longitude).fetch(5)
     return nearby_stations
 
 # Fonction pour récupérer les données météorologiques journalières d'une station donnée via son id
 def get_weather_data(station_id, start, end):
-    data = Daily(station_id, start, end)
+    data = ms.Daily(station_id, start, end)
     data = data.fetch()
     return data
 
 # Fonction pour récupérer les données météorologiques horaires d'une station donnée via son id
 def get_weather_data_hourly(station_id, start, end):
-    data = Hourly(station_id, start, end)
+    data = ms.Hourly(station_id, start, end)
     data = data.fetch()
     return data
 
