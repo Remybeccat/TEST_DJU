@@ -152,11 +152,6 @@ def get_weather_data_hourly(station_id, start, end):
     return df
 
 
-
-
-
-print(data.decode("utf-8"))
-
 def get_weather_data_api(station_id, start, end):
     conn = http.client.HTTPSConnection("meteostat.p.rapidapi.com")
 
