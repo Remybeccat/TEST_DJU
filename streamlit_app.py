@@ -14,7 +14,7 @@ OPENCAGE_KEY = "b9d04993bd4e471ab7a210c42585b523"
 API_BASE = "https://meteostat.p.rapidapi.com/"
 
 HEADERS = {
-    "X-API-Key": METEOSTAT_API_KEY
+    "X-API-Key": METEOSTAT_API_KEY,
     "x-rapidapi-host": "meteostat.p.rapidapi.com"
 }
 
