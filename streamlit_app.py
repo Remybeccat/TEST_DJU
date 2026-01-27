@@ -143,7 +143,7 @@ if address:
 	
 	st.dataframe(
 	    stations[["name", "distance_km"]]
-	    .rename(columns={"distance_km": "Distance (km)"})
+	    .rename(columns={"name":"nom des stations","distance_km": "Distance (km)"})
 	)
 	
 	station_name = st.selectbox(
