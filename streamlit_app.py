@@ -6,16 +6,16 @@ import datetime
 import requests
 from opencage.geocoder import OpenCageGeocode
 
+
 # =============================
 # CONFIG
 # =============================
-METEOSTAT_API_KEY = "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813"
 OPENCAGE_KEY = "b9d04993bd4e471ab7a210c42585b523"
 API_BASE = "https://meteostat.p.rapidapi.com/"
 
 HEADERS = {
-    "X-API-Key": METEOSTAT_API_KEY,
-    "x-rapidapi-host": "meteostat.p.rapidapi.com"
+	"x-rapidapi-key": "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813",
+	"x-rapidapi-host": "meteostat.p.rapidapi.com"
 }
 
 # =============================
@@ -46,7 +46,7 @@ def haversine(lat1, lon1, lat2, lon2):
 @st.cache_data(ttl=86400)
 def api_get(url, params):
     r = requests.get(url, headers=HEADERS, params=params, timeout=30)
-    r.raise_for_status()
+    #r.raise_for_status()
     return r.json().get("data", [])
 
 
