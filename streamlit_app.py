@@ -15,6 +15,7 @@ API_BASE = "https://meteostat.p.rapidapi.com/"
 
 HEADERS = {
     "X-API-Key": METEOSTAT_API_KEY
+    "x-rapidapi-host": "meteostat.p.rapidapi.com"
 }
 
 # =============================
