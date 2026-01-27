@@ -46,7 +46,7 @@ def haversine(lat1, lon1, lat2, lon2):
 @st.cache_data(ttl=86400)
 def api_get(url, params):
     r = requests.get(url, headers=HEADERS, params=params, timeout=30)
-    r.raise_for_status()
+    #r.raise_for_status()
     return r.json().get("data", [])
 
 
