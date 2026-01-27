@@ -62,7 +62,7 @@ def get_nearby_stations_api(lat, lon, radius=300, limit=10):
 		}
 		
 		response = requests.get(url, headers=headers, params=querystring)
-    return pd.DataFrame(data)
+	return pd.DataFrame(data)
 
 
 @st.cache_data(ttl=86400)
