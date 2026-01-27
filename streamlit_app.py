@@ -289,6 +289,8 @@ if address:
             end_date = datetime.datetime(end_date_FR.year, end_date_FR.month, end_date_FR.day)
             end_date_hour = datetime.datetime(end_date_FR.year, end_date_FR.month, end_date_FR.day, 23, 59)
 
+            st.print(selected_station_id)
+            
             # Données journalières
             with st.spinner("Chargement des données journalières..."):
                 data = get_weather_data_api(selected_station_id, start_date, end_date)
