@@ -134,7 +134,7 @@ if address:
 	if stations.empty:
 		st.warning("Aucune station trouvée")
 		st.stop()
-# conversion de la distance en km, renommage des stations et tri selon la distance
+	# conversion de la distance en km, renommage des stations et tri selon la distance
 	stations["distance_km"] = (stations["distance"] / 1000).round(1)
 	stations["name"] = stations["name"].apply(
 	    lambda x: x.get("en") if isinstance(x, dict) else x
@@ -145,58 +145,59 @@ if address:
 	    stations[["name", "distance_km"]]
 	    .rename(columns={"name":"nom des stations","distance_km": "Distance (km)"})
 	)
-	
-	station_name = st.selectbox(
-	    "Sélectionnez une station",
-	    stations["name"].tolist()
-	)
 
-	station_id = stations.loc[
-	    stations["name"] == station_name, "id"
-	].iloc[0]
+	# Sélection par nom
+	station_name = st.selectbox("Sélectionnez une station",stations["name"].tolist())
+	station_id = stations.loc[stations["name"] == station_name, "id"].iloc[0]
 	
-	year = datetime.date.today().year
-	
-	start = st.date_input("Début", datetime.date(year-1, 1, 1))
-	end = st.date_input("Fin", datetime.date(year, 1, 1))
-	
-	start_dt = datetime.datetime.combine(start, datetime.time.min)
-	end_dt = datetime.datetime.combine(end, datetime.time.max)
+	# Dates
+    today = datetime.date.today()
+    start_date = st.date_input("Date de début", datetime.date(today.year-1, 1, 1), max_value=today)
+    end_date = st.date_input("Date de fin", datetime.date(today.year, 1, 1), max_value=today)
+
+    start_dt = datetime.datetime.combine(start_date, datetime.time.min)
+    end_dt = datetime.datetime.combine(end_date, datetime.time.max)
 	
 	# DAILY
 	df = get_daily_api(station_id, start_dt, end_dt)
-	df = normalize_time_column(df)
-	
-	if not df.empty:
-		df["time"] = pd.to_datetime(df["time"])
-		df = df.set_index("time")
-		
-		st.subheader("Données journalières")
-		st.dataframe(df)
-		
-		ref = st.number_input("Température de référence", 0.0, 30.0, 18.0)
-		
-		st.write("DJU météo :", round(calculate_dju_meteo(df, ref), 1))
-		st.write("DJU COSTIC :", round(calculate_dju_costic(df, ref), 1))
-		
-		plt.figure(figsize=(10,5))
-		plt.plot(df.index, df["tmin"], label="Tmin")
-		plt.plot(df.index, df["tavg"], label="Tavg")
-		plt.plot(df.index, df["tmax"], label="Tmax")
-		plt.legend()
-		st.pyplot(plt)
+    if df.empty:
+        st.warning("Aucune donnée journalière disponible pour cette période.")
+    else:
+        df = normalize_time_column(df)
+        st.subheader("Données journalières")
+        st.dataframe(df)
 
-	# HOURLY
-	dfh = get_hourly_api(station_id, start_dt, end_dt)
-	dfh = normalize_time_column(dfh)
+        ref_temp = st.number_input("Température de référence pour DJU", -30.0, 50.0, 18.0)
 
-	if not dfh.empty:
-		dfh["time"] = pd.to_datetime(dfh["time"])
-		dfh = dfh.set_index("time")
-		
-		st.subheader("Données horaires")
-		st.dataframe(dfh.head(500))
-		
-		plt.figure(figsize=(10,5))
-		plt.plot(dfh.index, dfh["temp"])
-		st.pyplot(plt)
+        st.write("DJU méthode météo :", round(calculate_dju_meteo(df, ref_temp),1))
+        st.write("DJU méthode COSTIC :", round(calculate_dju_costic(df, ref_temp),1))
+
+        # Graphique
+        plt.figure(figsize=(10,5))
+        if all(c in df.columns for c in ["tmin","tavg","tmax"]):
+            plt.plot(df.index, df["tmin"], label="Tmin")
+            plt.plot(df.index, df["tavg"], label="Tavg")
+            plt.plot(df.index, df["tmax"], label="Tmax")
+            plt.fill_between(df.index, df["tmin"], df["tmax"], alpha=0.1)
+            plt.legend()
+            plt.title(f"Températures journalières pour {station_name}")
+            plt.xlabel("Date")
+            plt.ylabel("°C")
+            st.pyplot(plt)
+
+    # --- HOURLY ---
+    dfh = get_hourly_api(station_id, start_dt, end_dt)
+    if dfh.empty:
+        st.warning("Aucune donnée horaire disponible pour cette période.")
+    else:
+        dfh = normalize_time_column(dfh)
+        st.subheader("Données horaires")
+        st.dataframe(dfh.head(500))
+
+        if "temp" in dfh.columns:
+            plt.figure(figsize=(10,5))
+            plt.plot(dfh.index, dfh["temp"])
+            plt.title(f"Températures horaires pour {station_name}")
+            plt.xlabel("Date")
+            plt.ylabel("°C")
+            st.pyplot(plt)
