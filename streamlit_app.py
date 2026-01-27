@@ -106,6 +106,19 @@ def calculate_dju_costic(df, ref):
 	return df.apply(f, axis=1).sum()
 
 # =============================
+# Normalisation du temps
+# =============================
+
+def normalize_time_column(df):
+    if "time" in df.columns:
+        df["time"] = pd.to_datetime(df["time"])
+        df = df.set_index("time")
+    elif "date" in df.columns:
+        df["date"] = pd.to_datetime(df["date"])
+        df = df.set_index("date")
+    return df
+
+# =============================
 # UI
 # =============================
 st.title("Analyse météo (API Meteostat)")
@@ -121,11 +134,26 @@ if address:
 	if stations.empty:
 		st.warning("Aucune station trouvée")
 		st.stop()
+# conversion de la distance en km, renommage des stations et tri selon la distance
+	stations["distance_km"] = (stations["distance"] / 1000).round(1)
+	stations["name"] = stations["name"].apply(
+	    lambda x: x.get("en") if isinstance(x, dict) else x
+	)
+	stations = stations.sort_values("distance_km")
 	
-	st.dataframe(stations[["id", "name", "distance"]])
+	st.dataframe(
+	    stations[["name", "distance_km", "country"]]
+	    .rename(columns={"distance_km": "Distance (km)"})
+	)
 	
-	station_id = st.selectbox("Station", stations["id"])
-	station_name = stations.loc[stations["id"] == station_id, "name"].values[0]
+	station_name = st.selectbox(
+	    "Sélectionnez une station",
+	    stations["name"].tolist()
+	)
+
+	station_id = stations.loc[
+	    stations["name"] == station_name, "id"
+	].iloc[0]
 	
 	year = datetime.date.today().year
 	
@@ -137,6 +165,7 @@ if address:
 	
 	# DAILY
 	df = get_daily_api(station_id, start_dt, end_dt)
+	df = normalize_time_column(df)
 	
 	if not df.empty:
 		df["time"] = pd.to_datetime(df["time"])
@@ -159,6 +188,7 @@ if address:
 
 	# HOURLY
 	dfh = get_hourly_api(station_id, start_dt, end_dt)
+	dfh = normalize_time_column(dfh)
 
 	if not dfh.empty:
 		dfh["time"] = pd.to_datetime(dfh["time"])
