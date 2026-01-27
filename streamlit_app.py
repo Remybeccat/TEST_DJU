@@ -139,11 +139,17 @@ def get_nearby_stations(latitude, longitude, limit=5, radius_km=300):
 # Meteostat : séries temporelles
 # -----------------------------
 def get_weather_data(station_id, start, end):
-    return ms.daily(station_id, start, end).fetch()
+    df = ms.daily(station_id, start, end).fetch()
+    if df is None:
+        return pd.DataFrame()
+    return df
 
 
 def get_weather_data_hourly(station_id, start, end):
-    return ms.hourly(station_id, start, end).fetch()
+    df = ms.hourly(station_id, start, end).fetch()
+    if df is None:
+        return pd.DataFrame()
+    return df
 
 
 # -----------------------------
