@@ -142,7 +142,7 @@ if address:
 	stations = stations.sort_values("distance_km")
 	
 	st.dataframe(
-	    stations[["name", "distance_km", "country"]]
+	    stations[["name", "distance_km"]]
 	    .rename(columns={"distance_km": "Distance (km)"})
 	)
 	
