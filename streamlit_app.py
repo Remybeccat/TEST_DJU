@@ -153,10 +153,7 @@ def get_weather_data_hourly(station_id, start, end):
 
 
 
-conn.request("GET", "/point/monthly?lat=52.5244&lon=13.4105&alt=43&start=2020-01-01&end=2020-12-31", headers=headers)
 
-res = conn.getresponse()
-data = res.read()
 
 print(data.decode("utf-8"))
 
@@ -177,6 +174,10 @@ def get_weather_data_api(station_id, start, end):
     r = requests.get(conn, headers=headers, params=params, timeout=30)
     r.raise_for_status()
 
+#conn.request("GET", "/point/monthly?lat=52.5244&lon=13.4105&alt=43&start=2020-01-01&end=2020-12-31", headers=headers)
+#res = conn.getresponse()
+#data = res.read()
+    
     data = r.json().get("data", [])
     return pd.DataFrame(data)
     
