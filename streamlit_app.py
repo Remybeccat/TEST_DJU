@@ -76,6 +76,27 @@ def get_hourly_api(station, start, end):
 	})
 	return pd.DataFrame(data)
 
+#fonction pour découper en paquer de X jours car sinon au delà d'un certain seuil ça ne amrche pas
+def get_hourly_api_full_year(station_id, start, end, chunk_days=90):
+    """
+    Récupère des données horaires pour une longue période en découpant en chunks.
+    chunk_days : nombre de jours par appel (par défaut 90 jours)
+    """
+    dfs = []
+    current_start = start
+
+    while current_start < end:
+        current_end = min(current_start + datetime.timedelta(days=chunk_days), end)
+        df_chunk = get_hourly_api(station_id, current_start, current_end)
+        if not df_chunk.empty:
+            dfs.append(df_chunk)
+        current_start = current_end + datetime.timedelta(days=1)
+
+    if dfs:
+        df_full = pd.concat(dfs, ignore_index=True)
+        return normalize_time_column(df_full)
+    return pd.DataFrame()
+
 # =============================
 # DJU
 # =============================
@@ -179,18 +200,18 @@ if address:
 			st.pyplot(plt)
 
 	# --- HOURLY ---
-	dfh = get_hourly_api(station_id, start_dt, end_dt)
+	dfh = get_hourly_api_full_year(station_id, start_dt, end_dt)
+	
 	if dfh.empty:
-		st.warning("Aucune donnée horaire disponible pour cette période.")
+	    st.warning("Aucune donnée horaire disponible pour cette période.")
 	else:
-		dfh = normalize_time_column(dfh)
-		st.subheader("Données horaires")
-		st.dataframe(dfh.head(500))
-
-		if "temp" in dfh.columns:
-			plt.figure(figsize=(10,5))
-			plt.plot(dfh.index, dfh["temp"])
-			plt.title(f"Températures horaires pour {station_name}")
-			plt.xlabel("Date")
-			plt.ylabel("°C")
-			st.pyplot(plt)
+	    st.subheader("Données horaires")
+	    st.dataframe(dfh.head(500))
+	
+	    if "temp" in dfh.columns:
+	        plt.figure(figsize=(10,5))
+	        plt.plot(dfh.index, dfh["temp"])
+	        plt.title(f"Températures horaires pour {station_name}")
+	        plt.xlabel("Date")
+	        plt.ylabel("°C")
+	        st.pyplot(plt)
