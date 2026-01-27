@@ -77,17 +77,24 @@ def get_hourly_api(station, start, end):
 	return pd.DataFrame(data)
 
 #fonction pour découper en paquer de X jours car sinon au delà d'un certain seuil ça ne amrche pas
-def get_hourly_api_full_year(station_id, start, end, chunk_days=90):
+def get_hourly_api_full_year(station_id, start, end, chunk_days=180):
     """
     Récupère des données horaires pour une longue période en découpant en chunks.
-    chunk_days : nombre de jours par appel (par défaut 90 jours)
+    start, end : datetime.date ou datetime.datetime (on prend juste la date)
+    chunk_days : nombre de jours par appel
     """
     dfs = []
-    current_start = start
+    current_start = start.date() if isinstance(start, datetime.datetime) else start
+    end_date = end.date() if isinstance(end, datetime.datetime) else end
 
-    while current_start < end:
-        current_end = min(current_start + datetime.timedelta(days=chunk_days), end)
-        df_chunk = get_hourly_api(station_id, current_start, current_end)
+    while current_start <= end_date:
+        current_end = min(current_start + datetime.timedelta(days=chunk_days-1), end_date)
+        # Appel API avec format string YYYY-MM-DD
+        df_chunk = get_hourly_api(
+            station_id,
+            datetime.datetime.combine(current_start, datetime.time.min),
+            datetime.datetime.combine(current_end, datetime.time.min)
+        )
         if not df_chunk.empty:
             dfs.append(df_chunk)
         current_start = current_end + datetime.timedelta(days=1)
