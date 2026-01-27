@@ -46,25 +46,23 @@ def haversine(lat1, lon1, lat2, lon2):
 @st.cache_data(ttl=86400)
 def api_get(url, params):
     r = requests.get(url, headers=HEADERS, params=params, timeout=30)
-    #r.raise_for_status()
+    r.raise_for_status()
     return r.json().get("data", [])
 
 
 @st.cache_data(ttl=86400)
-
 def get_nearby_stations_api(lat, lon, radius=300, limit=10):
-	url = "https://meteostat.p.rapidapi.com/stations/nearby"
-	
-	params = {"lat": lat,"lon": lon}
-	
-	r = requests.get(url, headers=HEADERS, params=params, timeout=30)
-	
-	data = r.json().get("data", [])
-	
+    url = f"{API_BASE}/stations/nearby"
+    data = api_get(url, {
+        "lat": lat,
+        "lon": lon,
+        "radius": radius,
+        "limit": limit
+    })
     return pd.DataFrame(data)
 
-@st.cache_data(ttl=86400)
 
+@st.cache_data(ttl=86400)
 def get_daily_api(station, start, end):
     url = f"{API_BASE}/stations/daily"
     data = api_get(url, {
