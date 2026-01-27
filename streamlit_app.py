@@ -13,6 +13,22 @@ import requests
 
 st.write("L'application a démarré")  # Vérification initiale
 
+import http.client
+
+conn = http.client.HTTPSConnection("meteostat.p.rapidapi.com")
+
+headers = {
+    'x-rapidapi-key': "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813",
+    'x-rapidapi-host': "meteostat.p.rapidapi.com"
+}
+
+conn.request("GET", "/point/monthly?lat=52.5244&lon=13.4105&alt=43&start=2020-01-01&end=2020-12-31", headers=headers)
+
+res = conn.getresponse()
+data = res.read()
+
+print(data.decode("utf-8"))
+
 # -----------------------------
 # Géocodage (OpenCage)
 # -----------------------------
