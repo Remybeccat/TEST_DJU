@@ -59,7 +59,6 @@ def get_nearby_stations_api(lat, lon, radius=300, limit=10):
 	data = r.json().get("data", [])
     return pd.DataFrame(data)
 
-
 @st.cache_data(ttl=86400)
 def get_daily_api(station, start, end):
     url = f"{API_BASE}/stations/daily"
