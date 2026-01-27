@@ -1,389 +1,174 @@
 import streamlit as st
-import meteostat as ms
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
 import datetime
-from opencage.geocoder import OpenCageGeocode
-import traceback
-import os
-import sqlite3
-import urllib.request
 import requests
+from opencage.geocoder import OpenCageGeocode
 
-st.write("L'application a démarré")  # Vérification initiale
+# =============================
+# CONFIG
+# =============================
+METEOSTAT_API_KEY = "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813"
+OPENCAGE_KEY = "b9d04993bd4e471ab7a210c42585b523"
+API_BASE = "https://api.meteostat.net/v2"
 
-import http.client
+HEADERS = {
+    "X-API-Key": METEOSTAT_API_KEY
+}
 
-# -----------------------------
-# Géocodage (OpenCage)
-# -----------------------------
-def get_coordinates(address: str):
-    key = "b9d04993bd4e471ab7a210c42585b523"
-    geocoder = OpenCageGeocode(key)
-    try:
-        results = geocoder.geocode(address)
-        if results and len(results):
-            return results[0]["geometry"]["lat"], results[0]["geometry"]["lng"]
-        return None, None
-    except Exception as e:
-        st.error(f"Erreur OpenCage : {str(e)}")
-        return None, None
+# =============================
+# GEO
+# =============================
+def get_coordinates(address):
+    geocoder = OpenCageGeocode(OPENCAGE_KEY)
+    results = geocoder.geocode(address)
+    if results:
+        g = results[0]["geometry"]
+        return g["lat"], g["lng"]
+    return None, None
 
-# -----------------------------
-# Distance entre deux points (km)
-# -----------------------------
+
 def haversine(lat1, lon1, lat2, lon2):
-    R = 6371.0
-    lat1_rad = math.radians(lat1)
-    lon1_rad = math.radians(lon1)
-    lat2_rad = math.radians(lat2)
-    lon2_rad = math.radians(lon2)
-    dlat = lat2_rad - lat1_rad
-    dlon = lon2_rad - lon1_rad
-    a = math.sin(dlat / 2) ** 2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c
+    R = 6371
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dl = math.radians(lon2 - lon1)
+    a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dl/2)**2
+    return 2 * R * math.atan2(math.sqrt(a), math.sqrt(1-a))
 
 
-# -----------------------------
-# OPTION 1 : Stations sans meteostat.stations.nearby()
-# - Télécharge stations.db (officiel)
-# - Filtre en SQL via bounding box (sans acos/cos/sin)
-# - Calcule distances en Python
-# -----------------------------
-STATIONS_DB_URL = "https://data.meteostat.net/stations.db"
-STATIONS_DB_PATH = "/tmp/meteostat_stations.db"
+# =============================
+# API METEOSTAT
+# =============================
+@st.cache_data(ttl=86400)
+def api_get(url, params):
+    r = requests.get(url, headers=HEADERS, params=params, timeout=30)
+    r.raise_for_status()
+    return r.json().get("data", [])
 
 
-@st.cache_data(show_spinner=False)
-def ensure_stations_db() -> str:
-    """
-    Télécharge stations.db si absent (ou vide) et retourne le chemin local.
-    """
-    os.makedirs(os.path.dirname(STATIONS_DB_PATH), exist_ok=True)
-
-    needs_download = (not os.path.exists(STATIONS_DB_PATH)) or (os.path.getsize(STATIONS_DB_PATH) < 1024)
-
-    if needs_download:
-        try:
-            # Téléchargement direct
-            urllib.request.urlretrieve(STATIONS_DB_URL, STATIONS_DB_PATH)
-        except Exception as e:
-            raise RuntimeError(f"Impossible de télécharger stations.db depuis {STATIONS_DB_URL}: {e}")
-
-    return STATIONS_DB_PATH
-
-
-
-
-def get_nearby_stations(latitude, longitude, limit=5, radius_km=300):
-    db_path = ensure_stations_db()
-
-    # Bounding box rapide
-    # 1° latitude ≈ 111 km
-    lat_delta = radius_km / 111.0
-    # 1° longitude ≈ 111 km * cos(lat)
-    lon_delta = radius_km / (111.0 * max(0.1, math.cos(math.radians(latitude))))
-
-    lat_min = latitude - lat_delta
-    lat_max = latitude + lat_delta
-    lon_min = longitude - lon_delta
-    lon_max = longitude + lon_delta
-
-    conn = sqlite3.connect(db_path)
-
-    # IMPORTANT: pas de fonctions trig ici
-    sql = """
-        SELECT
-            s.id AS id,
-            n.name AS name,
-            s.country AS country,
-            s.region AS region,
-            s.latitude AS latitude,
-            s.longitude AS longitude,
-            s.elevation AS elevation,
-            s.timezone AS timezone
-        FROM stations s
-        LEFT JOIN names n
-            ON s.id = n.station
-           AND n.language = 'en'
-        WHERE
-            s.latitude BETWEEN ? AND ?
-            AND s.longitude BETWEEN ? AND ?
-    """
-
-    df = pd.read_sql_query(sql, conn, params=[lat_min, lat_max, lon_min, lon_max])
-    conn.close()
-
-    if df.empty:
-        return pd.DataFrame()
-
-    # Distance précise en Python
-    df["distance en km"] = df.apply(
-        lambda r: round(haversine(latitude, longitude, r["latitude"], r["longitude"])),
-        axis=1,
-    )
-
-    df = df.sort_values("distance en km").head(limit)
-
-    # Index = id (pratique ensuite)
-    df = df.set_index("id", drop=False)
-
-    # Si name est null, fallback sur id
-    if "name" in df.columns:
-        df["name"] = df["name"].fillna(df["id"])
-
-    return df
-
-
-def get_nearby_stations_api(latitude, longitude, limit=5, radius_km=300):
-
-    url = "https://meteostat.p.rapidapi.com/stations/nearby"
-    
-    headers = {
-    	"x-rapidapi-key": "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813",
-    	"x-rapidapi-host": "meteostat.p.rapidapi.com"
-    } 
-    
-    params = {
-        "lat": latitude,
-        "lon": longitude,
-        "limit": limit,
-        "radius": radius_km
-    }
-
-    r = requests.get(url, headers=headers, params=params)
-    # r.raise_for_status()
-    
-    data = r.json().get("data", [])
+@st.cache_data(ttl=86400)
+def get_nearby_stations_api(lat, lon, radius=300, limit=10):
+    url = f"{API_BASE}/stations/nearby"
+    data = api_get(url, {
+        "lat": lat,
+        "lon": lon,
+        "radius": radius,
+        "limit": limit
+    })
     return pd.DataFrame(data)
 
-# -----------------------------
-# Meteostat : séries temporelles
-# -----------------------------
-def get_weather_data(station_id, start, end):
-    df = ms.daily(station_id, start, end).fetch()
-    if df is None:
-        return pd.DataFrame()
-    return df
 
-
-def get_weather_data_hourly(station_id, start, end):
-    df = ms.hourly(station_id, start, end).fetch()
-    if df is None:
-        return pd.DataFrame()
-    return df
-
-
-def get_weather_data_api(station_id, start, end):
-    url = "https://meteostat.p.rapidapi.com/stations/daily"
-    
-    headers = {
-    	"x-rapidapi-key": "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813",
-    	"x-rapidapi-host": "meteostat.p.rapidapi.com"
-    } 
-    
-    params = {
-        "station": station_id,
+@st.cache_data(ttl=86400)
+def get_daily_api(station, start, end):
+    url = f"{API_BASE}/stations/daily"
+    data = api_get(url, {
+        "station": station,
         "start": start.strftime("%Y-%m-%d"),
-        "end": end.strftime("%Y-%m-%d"),
-        "tz":"Europe/Berlin"
-    }
-
-    r = requests.get(url, headers=headers, params=params)
-   # r.raise_for_status()
-    
-    data = r.json().get("data", [])
+        "end": end.strftime("%Y-%m-%d")
+    })
     return pd.DataFrame(data)
-    
-def get_weather_data_hourly_api(station_id, start, end):
-    url = "https://meteostat.p.rapidapi.com/stations/hourly"
-    
-    headers = {
-    	"x-rapidapi-key": "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813",
-    	"x-rapidapi-host": "meteostat.p.rapidapi.com"
-    } 
-    
-    params = {
-        "station": station_id,
+
+
+@st.cache_data(ttl=86400)
+def get_hourly_api(station, start, end):
+    url = f"{API_BASE}/stations/hourly"
+    data = api_get(url, {
+        "station": station,
         "start": start.strftime("%Y-%m-%d"),
-        "end": end.strftime("%Y-%m-%d"),
-        "tz":"Europe/Berlin"
-    }
-
-    r = requests.get(url, headers=headers, params=params)
-   # r.raise_for_status()
-    
-    data = r.json().get("data", [])
+        "end": end.strftime("%Y-%m-%d")
+    })
     return pd.DataFrame(data)
 
-# -----------------------------
+
+# =============================
 # DJU
-# -----------------------------
-def calculate_dju_meteo(data, reference_temp):
-    dju = data.apply(
-        lambda row: max(0, reference_temp - (row["tmin"] + row["tmax"]) / 2)
-        if pd.notnull(row["tmin"]) and pd.notnull(row["tmax"])
-        else 0,
-        axis=1,
+# =============================
+def calculate_dju_meteo(df, ref):
+    return (
+        (ref - (df["tmin"] + df["tmax"]) / 2)
+        .clip(lower=0)
+        .sum()
     )
-    return dju.sum()
 
 
-def calculate_dju_costic(data, reference_temp):
-    def costic_dju(row, reference_temp):
-        t_min = row["tmin"]
-        t_max = row["tmax"]
-
-        if pd.isnull(t_max) or pd.isnull(t_min):
+def calculate_dju_costic(df, ref):
+    def f(row):
+        tmin, tmax = row["tmin"], row["tmax"]
+        if pd.isnull(tmin) or pd.isnull(tmax):
             return 0
-        elif reference_temp > t_max:
-            return reference_temp - (t_max + t_min) / 2
-        elif reference_temp < t_min:
+        if ref > tmax:
+            return ref - (tmin + tmax) / 2
+        if ref < tmin:
             return 0
-        else:
-            return (reference_temp - t_min) * (0.08 + 0.42 * (reference_temp - t_min) / (t_max - t_min))
-
-    dju = data.apply(lambda row: costic_dju(row, reference_temp), axis=1)
-    return dju.sum()
+        return (ref - tmin) * (0.08 + 0.42 * (ref - tmin) / (tmax - tmin))
+    return df.apply(f, axis=1).sum()
 
 
-# -----------------------------
-# UI Streamlit
-# -----------------------------
-st.title("Analyse Météo avec Meteostat et Streamlit")
+# =============================
+# UI
+# =============================
+st.title("Analyse météo (API Meteostat)")
 
-address = st.text_input("Entrez une adresse ou une ville (ex. Paris, France):")
+address = st.text_input("Ville ou adresse")
 
 if address:
-    st.write("Adresse saisie : ", address)
-
     lat, lon = get_coordinates(address)
+    st.success(f"📍 {lat:.4f}, {lon:.4f}")
 
-    if lat is None or lon is None:
-        st.write("Adresse non valide ou introuvable.")
-    else:
-        st.write(f"Adresse trouvée : Latitude = {lat}, Longitude = {lon}")
+    stations = get_nearby_stations_api(lat, lon)
 
-        try:
-            with st.spinner("Recherche de stations météo proches..."):
-                nearby_stations = get_nearby_stations_api(lat, lon, limit=10, radius_km=300)
-        except Exception as e:
-            st.error(str(e))
-            st.text(traceback.format_exc())
-            raise
+    if stations.empty:
+        st.warning("Aucune station trouvée")
+        st.stop()
 
-        if nearby_stations.empty:
-            st.write("Aucune station météo trouvée à proximité.")
-        else:
-            st.write("Stations météo trouvées :")
+    st.dataframe(stations[["id", "name", "distance"]])
 
-            if (
-                "name" in nearby_stations.columns
-                and "distance en km" in nearby_stations.columns
-                and "elevation" in nearby_stations.columns
-            ):
-                st.dataframe(
-                    nearby_stations[["name", "distance en km", "elevation"]].rename(columns={"elevation": "Altitude (m)"})
-                )
-            else:
-                st.dataframe(nearby_stations)
+    station_id = st.selectbox("Station", stations["id"])
+    station_name = stations.loc[stations["id"] == station_id, "name"].values[0]
 
-            # Sélection station
-            selected_station_name = st.selectbox("Sélectionnez une station :", nearby_stations["name"].tolist())
-            selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name, "id"].iloc[0]
+    year = datetime.date.today().year
 
-            year_max = datetime.date.today().year
+    start = st.date_input("Début", datetime.date(year-1, 1, 1))
+    end = st.date_input("Fin", datetime.date(year, 1, 1))
 
-            start_date_FR = st.date_input(
-                "Selectionner la date de début",
-                datetime.datetime(year_max - 1, 1, 1),
-                max_value=datetime.date.today(),
-                format="DD/MM/YYYY",
-            )
-            end_date_FR = st.date_input(
-                "Selectionner la date de fin",
-                datetime.datetime(year_max, 1, 1),
-                max_value=datetime.date.today(),
-                format="DD/MM/YYYY",
-            )
+    start_dt = datetime.datetime.combine(start, datetime.time.min)
+    end_dt = datetime.datetime.combine(end, datetime.time.max)
 
-            start_date = datetime.datetime(start_date_FR.year, start_date_FR.month, start_date_FR.day)
-            end_date = datetime.datetime(end_date_FR.year, end_date_FR.month, end_date_FR.day)
-            end_date_hour = datetime.datetime(end_date_FR.year, end_date_FR.month, end_date_FR.day, 23, 59)
+    # DAILY
+    df = get_daily_api(station_id, start_dt, end_dt)
 
-            st.print(selected_station_id)
-            
-            # Données journalières
-            with st.spinner("Chargement des données journalières..."):
-                data = get_weather_data_api(selected_station_id, start_date, end_date)
+    if not df.empty:
+        df["time"] = pd.to_datetime(df["time"])
+        df = df.set_index("time")
 
-            if not data.empty:
-                st.write(
-                    f"Données météos journalières pour la station {selected_station_name} du {start_date_FR} au {end_date_FR}"
-                )
-                st.dataframe(data)
+        st.subheader("Données journalières")
+        st.dataframe(df)
 
-                reference_temp = st.number_input(
-                    "Entrez la température de référence pour calculer les DJU :",
-                    min_value=-30.0,
-                    max_value=50.0,
-                    value=18.0,
-                )
+        ref = st.number_input("Température de référence", 0.0, 30.0, 18.0)
 
-                required_cols = ["tmin", "tavg", "tmax"]
-                if all(col in data.columns for col in required_cols):
-                    dju_meteo = calculate_dju_meteo(data, reference_temp)
-                    dju_costic = calculate_dju_costic(data, reference_temp)
+        st.write("DJU météo :", round(calculate_dju_meteo(df, ref), 1))
+        st.write("DJU COSTIC :", round(calculate_dju_costic(df, ref), 1))
 
-                    st.write(
-                        f"Le total des DJU méthode météo pour la période du {start_date_FR} au {end_date_FR} est : {dju_meteo:.2f}"
-                    )
-                    st.write(
-                        f"Le total des DJU méthode COSTIC pour la période du {start_date_FR} au {end_date_FR} est : {dju_costic:.2f}"
-                    )
+        plt.figure(figsize=(10,5))
+        plt.plot(df.index, df["tmin"], label="Tmin")
+        plt.plot(df.index, df["tavg"], label="Tavg")
+        plt.plot(df.index, df["tmax"], label="Tmax")
+        plt.legend()
+        st.pyplot(plt)
 
-                    plt.figure(figsize=(10, 6))
-                    plt.plot(data.index, data["tmin"], label="Température Min (°C)")
-                    plt.plot(data.index, data["tavg"], label="Température Moy (°C)")
-                    plt.plot(data.index, data["tmax"], label="Température Max (°C)")
-                    plt.fill_between(data.index, data["tmin"], data["tmax"], alpha=0.1)
-                    plt.title(
-                        f"Températures Min, Moy et Max pour {selected_station_name} du {start_date_FR} au {end_date_FR}"
-                    )
-                    plt.xlabel("Date")
-                    plt.ylabel("Température (°C)")
-                    plt.legend()
-                    st.pyplot(plt)
-                else:
-                    st.warning("Les données météo sont incomplètes pour les calculs.")
-            else:
-                st.write(
-                    f"Aucune donnée disponible pour la station '{selected_station_name}' du {start_date_FR} au {end_date_FR}."
-                )
+    # HOURLY
+    dfh = get_hourly_api(station_id, start_dt, end_dt)
 
-            # Données horaires
-            with st.spinner("Chargement des données horaires..."):
-                data_hour = get_weather_data_hourly_api(selected_station_id, start_date, end_date_hour)
+    if not dfh.empty:
+        dfh["time"] = pd.to_datetime(dfh["time"])
+        dfh = dfh.set_index("time")
 
-            if not data_hour.empty:
-                st.write(
-                    f"Données météos horaires pour la station {selected_station_name} du {start_date_FR} au {end_date_FR}"
-                )
-                st.dataframe(data_hour)
+        st.subheader("Données horaires")
+        st.dataframe(dfh.head(500))
 
-                plt.figure(figsize=(10, 6))
-                if "temp" in data_hour.columns:
-                    plt.plot(data_hour.index, data_hour["temp"], label="Température (°C)")
-                else:
-                    st.warning("Colonne 'temp' absente des données horaires.")
-                plt.title(f"Températures horaires pour {selected_station_name} du {start_date_FR} au {end_date_FR}")
-                plt.xlabel("Date")
-                plt.ylabel("Température (°C)")
-                plt.legend()
-                st.pyplot(plt)
-            else:
-                st.write(
-                    f"Aucune donnée disponible pour la station '{selected_station_name}' du {start_date_FR} au {end_date_FR}."
-                )
+        plt.figure(figsize=(10,5))
+        plt.plot(dfh.index, dfh["temp"])
+        st.pyplot(plt)
