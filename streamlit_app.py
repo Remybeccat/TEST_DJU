@@ -97,7 +97,7 @@ def get_hourly_api_full_year(station_id, start, end, chunk_days=30):
         )
         if not df_chunk.empty:
             dfs.append(df_chunk)
-        current_start = current_end + datetime.timedelta(days=chunk_days-1)
+        current_start = current_end + datetime.timedelta(days=-1)
 
     if dfs:
         df_full = pd.concat(dfs, ignore_index=True)
