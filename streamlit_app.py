@@ -59,6 +59,7 @@ def get_nearby_stations_api(lat, lon, radius=300, limit=10):
         "radius": radius,
         "limit": limit
     })
+	st.write(data)
     return pd.DataFrame(data)
 
 
@@ -120,7 +121,6 @@ if address:
     st.success(f"📍 {lat:.4f}, {lon:.4f}")
 
     stations = get_nearby_stations_api(lat, lon)
-    st.success(stations)
 	
     if stations.empty:
         st.warning("Aucune station trouvée")
