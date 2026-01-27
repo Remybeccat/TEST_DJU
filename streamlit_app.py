@@ -22,22 +22,22 @@ HEADERS = {
 # GEO
 # =============================
 def get_coordinates(address):
-    geocoder = OpenCageGeocode(OPENCAGE_KEY)
-    results = geocoder.geocode(address)
-    if results:
-        g = results[0]["geometry"]
-        return g["lat"], g["lng"]
-    return None, None
+	geocoder = OpenCageGeocode(OPENCAGE_KEY)
+	results = geocoder.geocode(address)
+	if results:
+		g = results[0]["geometry"]
+		return g["lat"], g["lng"]
+	return None, None
 
 
 def haversine(lat1, lon1, lat2, lon2):
-    R = 6371
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
-    dphi = math.radians(lat2 - lat1)
-    dl = math.radians(lon2 - lon1)
-    a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dl/2)**2
-    return 2 * R * math.atan2(math.sqrt(a), math.sqrt(1-a))
+	R = 6371
+	phi1 = math.radians(lat1)
+	phi2 = math.radians(lat2)
+	dphi = math.radians(lat2 - lat1)
+	dl = math.radians(lon2 - lon1)
+	a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dl/2)**2
+	return 2 * R * math.atan2(math.sqrt(a), math.sqrt(1-a))
 
 
 # =============================
