@@ -120,7 +120,7 @@ if address:
     st.success(f"📍 {lat:.4f}, {lon:.4f}")
 
     stations = get_nearby_stations_api(lat, lon)
-    st.success(f"stations")
+    st.success(stations)
 	
     if stations.empty:
         st.warning("Aucune station trouvée")
