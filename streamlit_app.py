@@ -54,12 +54,7 @@ def api_get(url, params):
 def get_nearby_stations_api(lat, lon, radius=300, limit=10):
     url = f"{API_BASE}/stations/nearby"
 
-	params = {
-        "lat": lat,
-        "lon": lon,
-        "radius": radius,
-        "limit": limit
-    }
+	params = {"lat": lat, "lon": lon, "radius": radius, "limit": limit}
 	
 	r = requests.get(url, headers=HEADERS, params=params, timeout=30)
     r.raise_for_status()
