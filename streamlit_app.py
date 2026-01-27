@@ -52,16 +52,14 @@ def api_get(url, params):
 
 @st.cache_data(ttl=86400)
 def get_nearby_stations_api(lat, lon, radius=300, limit=10):
-	url = "https://meteostat.p.rapidapi.com/stations/nearby"
-	
-	querystring = {"lat":"51.5085","lon":"-0.1257"}
-	
-	headers = {
-		"x-rapidapi-key": "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813",
-		"x-rapidapi-host": "meteostat.p.rapidapi.com"
-	}
-	response = requests.get(url, headers=headers, params=querystring)
-	return pd.DataFrame(data)
+    url = f"{API_BASE}/stations/nearby"
+    data = api_get(url, {
+        "lat": lat,
+        "lon": lon,
+        "radius": radius,
+        "limit": limit
+    })
+    return pd.DataFrame(data)
 
 @st.cache_data(ttl=86400)
 def get_daily_api(station, start, end):
