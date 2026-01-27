@@ -120,11 +120,12 @@ if address:
     st.success(f"📍 {lat:.4f}, {lon:.4f}")
 
     stations = get_nearby_stations_api(lat, lon)
-
+	st.write(stations)
+	
     if stations.empty:
         st.warning("Aucune station trouvée")
         st.stop()
-
+	
     st.dataframe(stations[["id", "name", "distance"]])
 
     station_id = st.selectbox("Station", stations["id"])
