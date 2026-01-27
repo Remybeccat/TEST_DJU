@@ -77,7 +77,8 @@ def get_hourly_api(station, start, end):
 	data = api_get(url, {
 		"station": station,
 		"start": start.strftime("%Y-%m-%d"),
-		"end": end.strftime("%Y-%m-%d")
+		"end": end.strftime("%Y-%m-%d"),
+		"tz":"Europe/Berlin"
 	})
 	return pd.DataFrame(data)
 
