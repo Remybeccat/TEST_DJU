@@ -57,8 +57,8 @@ def get_nearby_stations_api(lat, lon, radius=300, limit=10):
 	params = {"lat": lat,"lon": lon,"limit": limit,"radius": radius}
 
 	r = requests.get(url, headers=HEADERS, params=params, timeout=30)
-    r.raise_for_status()
-    data = r.json().get("data", [])
+	
+	data = r.json().get("data", [])
     return pd.DataFrame(data)
 
 
