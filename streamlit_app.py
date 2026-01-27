@@ -153,20 +153,21 @@ def get_weather_data_hourly(station_id, start, end):
 
 
 def get_weather_data_api(station_id, start, end):
-    conn = http.client.HTTPSConnection("meteostat.p.rapidapi.com")
-
+ 
+    url = "https://meteostat.p.rapidapi.com/stations/hourly"
+   
     headers = {
-        'x-rapidapi-key': "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813",
-        'x-rapidapi-host': "meteostat.p.rapidapi.com"
+    	"x-rapidapi-key": "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813",
+    	"x-rapidapi-host": "meteostat.p.rapidapi.com"
     }
-    
+        
     params = {
         "station": station_id,
         "start": start.strftime("%Y-%m-%d"),
         "end": end.strftime("%Y-%m-%d")
     }
 
-    r = requests.get(conn, headers=headers, params=params, timeout=30)
+    r = requests.get(url, headers=headers, params=params, timeout=30)
     r.raise_for_status()
 
 #conn.request("GET", "/point/monthly?lat=52.5244&lon=13.4105&alt=43&start=2020-01-01&end=2020-12-31", headers=headers)
