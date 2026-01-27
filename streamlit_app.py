@@ -9,10 +9,9 @@ import traceback
 import os
 import sqlite3
 import urllib.request
-
+import requests
 
 st.write("L'application a démarré")  # Vérification initiale
-
 
 # -----------------------------
 # Géocodage (OpenCage)
@@ -28,7 +27,6 @@ def get_coordinates(address: str):
     except Exception as e:
         st.error(f"Erreur OpenCage : {str(e)}")
         return None, None
-
 
 # -----------------------------
 # Distance entre deux points (km)
@@ -151,6 +149,39 @@ def get_weather_data_hourly(station_id, start, end):
         return pd.DataFrame()
     return df
 
+def get_weather_data_api(station_id, start, end):
+    url = "https://api.meteostat.net/v2/stations/daily"
+    headers = {
+        'x-rapidapi-key: 6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813'
+    }
+    params = {
+        "station": station_id,
+        "start": start.strftime("%Y-%m-%d"),
+        "end": end.strftime("%Y-%m-%d")
+    }
+
+    r = requests.get(url, headers=headers, params=params, timeout=30)
+    r.raise_for_status()
+
+    data = r.json().get("data", [])
+    return pd.DataFrame(data)
+    
+def get_weather_data_hourly_api(station_id, start, end):
+    url = "https://api.meteostat.net/v2/stations/hourly"
+    headers = {
+        'x-rapidapi-key: 6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813'
+    }
+    params = {
+        "station": station_id,
+        "start": start.strftime("%Y-%m-%d"),
+        "end": end.strftime("%Y-%m-%d")
+    }
+
+    r = requests.get(url, headers=headers, params=params, timeout=30)
+    r.raise_for_status()
+
+    data = r.json().get("data", [])
+    return pd.DataFrame(data)
 
 # -----------------------------
 # DJU
@@ -249,7 +280,7 @@ if address:
 
             # Données journalières
             with st.spinner("Chargement des données journalières..."):
-                data = get_weather_data(selected_station_id, start_date, end_date)
+                data = get_weather_data_api(selected_station_id, start_date, end_date)
 
             if not data.empty:
                 st.write(
@@ -297,7 +328,7 @@ if address:
 
             # Données horaires
             with st.spinner("Chargement des données horaires..."):
-                data_hour = get_weather_data_hourly(selected_station_id, start_date, end_date_hour)
+                data_hour = get_weather_data_hourly_api(selected_station_id, start_date, end_date_hour)
 
             if not data_hour.empty:
                 st.write(
