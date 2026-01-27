@@ -10,7 +10,7 @@ from opencage.geocoder import OpenCageGeocode
 # =============================
 # CONFIG
 # =============================
-OPENCAGE_KEY = "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813"
+OPENCAGE_KEY = "b9d04993bd4e471ab7a210c42585b523"
 API_BASE = "https://meteostat.p.rapidapi.com/"
 
 HEADERS = {
