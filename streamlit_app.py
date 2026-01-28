@@ -138,7 +138,7 @@ if address:
             #selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name, "id"].iloc[0]
             selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name]
             st.write(selected_station_id)
-            st.write(selected_station_id["id"])
+            st.write(selected_station_id.loc[0})
             
             year_max = datetime.date.today().year
             start_date_FR = st.date_input(
