@@ -74,67 +74,11 @@ def ensure_stations_db() -> str:
 
     return STATIONS_DB_PATH
 
+def get_nearby_stations(latitude, longitude, limit=5):
 
-
-
-def get_nearby_stations(latitude, longitude, limit=5, radius_km=300):
-    db_path = ensure_stations_db()
-
-    # Bounding box rapide
-    # 1° latitude ≈ 111 km
-    lat_delta = radius_km / 111.0
-    # 1° longitude ≈ 111 km * cos(lat)
-    lon_delta = radius_km / (111.0 * max(0.1, math.cos(math.radians(latitude))))
-
-    lat_min = latitude - lat_delta
-    lat_max = latitude + lat_delta
-    lon_min = longitude - lon_delta
-    lon_max = longitude + lon_delta
-
-    conn = sqlite3.connect(db_path)
-
-    # IMPORTANT: pas de fonctions trig ici
-    sql = """
-        SELECT
-            s.id AS id,
-            n.name AS name,
-            s.country AS country,
-            s.region AS region,
-            s.latitude AS latitude,
-            s.longitude AS longitude,
-            s.elevation AS elevation,
-            s.timezone AS timezone
-        FROM stations s
-        LEFT JOIN names n
-            ON s.id = n.station
-           AND n.language = 'en'
-        WHERE
-            s.latitude BETWEEN ? AND ?
-            AND s.longitude BETWEEN ? AND ?
-    """
-
-    df = pd.read_sql_query(sql, conn, params=[lat_min, lat_max, lon_min, lon_max])
-    conn.close()
-
-    if df.empty:
-        return pd.DataFrame()
-
-    # Distance précise en Python
-    df["distance en km"] = df.apply(
-        lambda r: round(haversine(latitude, longitude, r["latitude"], r["longitude"])),
-        axis=1,
-    )
-
-    df = df.sort_values("distance en km").head(limit)
-
-    # Index = id (pratique ensuite)
-    df = df.set_index("id", drop=False)
-
-    # Si name est null, fallback sur id
-    if "name" in df.columns:
-        df["name"] = df["name"].fillna(df["id"])
-
-    return df
+    POINT = ms.Point(latitude, longitude)
+    stations = ms.stations.nearby(POINT, limit=4)
+    return stations
 
 
 def get_nearby_stations_api(latitude, longitude, limit=5, radius_km=300):
