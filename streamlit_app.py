@@ -137,6 +137,8 @@ if address:
             selected_station_name = st.selectbox("Sélectionnez une station :", nearby_stations["name"].tolist()) 
             #selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name, "id"].iloc[0]
             selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name]
+            st.write(selected_station_id)
+            st.write(selected_station_id["id"])
             
             year_max = datetime.date.today().year
             start_date_FR = st.date_input(
@@ -158,7 +160,7 @@ if address:
             # Données journalières
             with st.spinner("Chargement des données journalières..."):
                 data = get_weather_data(selected_station_id, start_date, end_date)
-                st.write(data)
+                
             if not data.empty:
                 st.write(
                     f"Données météos journalières pour la station {selected_station_name} du {start_date_FR} au {end_date_FR}"
