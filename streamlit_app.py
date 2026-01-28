@@ -51,7 +51,8 @@ def haversine(lat1, lon1, lat2, lon2):
 def get_nearby_stations(latitude, longitude):
     POINT = ms.Point(latitude, longitude) 
     stations = ms.stations.nearby(POINT, radius = 300000, limit = 10)
-    return stations
+    df = stations.fetch()
+    return df
     
 # -----------------------------
 # Meteostat : séries temporelles
