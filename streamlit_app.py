@@ -181,7 +181,7 @@ if address:
                     )
                    
                     plt.figure(figsize=(10, 6))
-                    plt.plot(data["time"], data["tmin"], label="Température Min (°C)")
+                    plt.plot(data["time"].index, data["tmin"], label="Température Min (°C)")
                     plt.plot(data.index, data["temp"], label="Température Moy (°C)")
                     plt.plot(data.index, data["tmax"], label="Température Max (°C)")
                     plt.fill_between(data.index, data["tmin"], data["tmax"], alpha=0.1)
