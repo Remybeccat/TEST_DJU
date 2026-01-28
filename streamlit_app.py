@@ -137,7 +137,6 @@ if address:
             selected_station_name = st.selectbox("Sélectionnez une station :", nearby_stations["name"].tolist()) 
             #selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name, "id"].iloc[0]
             selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name]
-            st.write(selected_station_id)
             
             year_max = datetime.date.today().year
             start_date_FR = st.date_input(
@@ -170,7 +169,7 @@ if address:
                     max_value=50.0,
                     value=18.0,
                 )
-                required_cols = ["tmin", "tavg", "tmax"]
+                required_cols = ["tmin", "temp", "tmax"]
                 if all(col in data.columns for col in required_cols):
                     dju_meteo = calculate_dju_meteo(data, reference_temp)
                     dju_costic = calculate_dju_costic(data, reference_temp)
@@ -182,7 +181,7 @@ if address:
                     )
                     plt.figure(figsize=(10, 6))
                     plt.plot(data.index, data["tmin"], label="Température Min (°C)")
-                    plt.plot(data.index, data["tavg"], label="Température Moy (°C)")
+                    plt.plot(data.index, data["temp"], label="Température Moy (°C)")
                     plt.plot(data.index, data["tmax"], label="Température Max (°C)")
                     plt.fill_between(data.index, data["tmin"], data["tmax"], alpha=0.1)
                     plt.title(
