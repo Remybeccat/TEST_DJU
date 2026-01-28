@@ -158,6 +158,7 @@ if address:
             # Données journalières
             with st.spinner("Chargement des données journalières..."):
                 data = get_weather_data(selected_station_id, start_date, end_date)
+                st.write(data)
             if not data.empty:
                 st.write(
                     f"Données météos journalières pour la station {selected_station_name} du {start_date_FR} au {end_date_FR}"
@@ -181,7 +182,7 @@ if address:
                     )
                    
                     plt.figure(figsize=(10, 6))
-                    plt.plot(data["time"].index, data["tmin"], label="Température Min (°C)")
+                    plt.plot(data.index, data["tmin"], label="Température Min (°C)")
                     plt.plot(data.index, data["temp"], label="Température Moy (°C)")
                     plt.plot(data.index, data["tmax"], label="Température Max (°C)")
                     plt.fill_between(data.index, data["tmin"], data["tmax"], alpha=0.1)
