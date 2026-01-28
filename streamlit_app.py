@@ -47,12 +47,11 @@ def haversine(lat1, lon1, lat2, lon2):
 # - Calcule distances en Python
 # -----------------------------
 
-@st.cache_data(show_spinner=False)
-    
+@st.cache_data(show_spinner=False)  
 def get_nearby_stations(latitude, longitude):
-    POINT = ms.Point(latitude, longitude)
-    stations = ms.stations.nearby(POINT, radius = 300000, limit = 10)
-    return pd.DataFrame(stations)
+    stations = ms.Stations().nearby(latitude, longitude).fetch(10)
+    stations["distance_km"] = stations["distance"] / 1000
+    return stations
     
 # -----------------------------
 # Meteostat : séries temporelles
@@ -123,8 +122,13 @@ if address:
                 and "elevation" in nearby_stations.columns
             ):
                 st.dataframe(
-                    nearby_stations[["name", "distance en km", "elevation"]].rename(columns={"elevation": "Altitude (m)"})
+                    nearby_stations[["name", "distance_km", "elevation"]]
+                    .rename(columns={
+                        "distance_km": "Distance (km)",
+                        "elevation": "Altitude (m)"
+                    })
                 )
+                
             else:
                 st.dataframe(nearby_stations)
             # Sélection station
@@ -147,7 +151,6 @@ if address:
             start_date = datetime.datetime(start_date_FR.year, start_date_FR.month, start_date_FR.day)
             end_date = datetime.datetime(end_date_FR.year, end_date_FR.month, end_date_FR.day)
             end_date_hour = datetime.datetime(end_date_FR.year, end_date_FR.month, end_date_FR.day, 23, 59)
-            st.print(selected_station_id)
             
             # Données journalières
             with st.spinner("Chargement des données journalières..."):
