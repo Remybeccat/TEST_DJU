@@ -136,9 +136,9 @@ if address:
             # Sélection station 
             selected_station_name = st.selectbox("Sélectionnez une station :", nearby_stations["name"].tolist()) 
             #selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name, "id"].iloc[0]
-            selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name]
-            st.write(selected_station_id)
-            st.write(selected_station_id.index.item())
+            selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name].index.item()
+            #st.write(selected_station_id)
+            #st.write(selected_station_id.index.item())
             
             year_max = datetime.date.today().year
             start_date_FR = st.date_input(
