@@ -119,7 +119,7 @@ if address:
             st.write("Stations météo trouvées :")
             if (
                 "name" in nearby_stations.columns
-                and "distance en km" in nearby_stations.columns
+                and "distance_km" in nearby_stations.columns
                 and "elevation" in nearby_stations.columns
             ):
                 st.dataframe(
