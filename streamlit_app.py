@@ -179,7 +179,9 @@ if address:
                     st.write(
                         f"Le total des DJU méthode COSTIC pour la période du {start_date_FR} au {end_date_FR} est : {dju_costic:.2f}"
                     )
-                    plt.figure(figsize=(10, 6))
+                    # Assurez-vous que l'index est bien datetime
+                    if not isinstance(data.index, pd.DatetimeIndex):
+                        data.index = pd.to_datetime(data.index)
                     plt.figure(figsize=(10, 6))
                     plt.plot(data.index, data["tmin"], label="Température Min (°C)")
                     plt.plot(data.index, data["temp"], label="Température Moy (°C)")
