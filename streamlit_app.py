@@ -179,20 +179,9 @@ if address:
                     st.write(
                         f"Le total des DJU méthode COSTIC pour la période du {start_date_FR} au {end_date_FR} est : {dju_costic:.2f}"
                     )
-                    # Vérifier si DataFrame n'est pas vide
-                    if not data.empty:
-                        # Si le DataFrame a une colonne 'time', utiliser comme index datetime
-                        if "time" in data.columns:
-                            data.index = pd.to_datetime(data["time"])
-                        else:
-                            # Sinon, essayer de convertir l'index
-                            try:
-                                data.index = pd.to_datetime(data.index)
-                            except Exception as e:
-                                st.error(f"Impossible de convertir l'index en datetime : {e}")
-                    
+                   
                     plt.figure(figsize=(10, 6))
-                    plt.plot(data.index, data["tmin"], label="Température Min (°C)")
+                    plt.plot(data["time"], data["tmin"], label="Température Min (°C)")
                     plt.plot(data.index, data["temp"], label="Température Moy (°C)")
                     plt.plot(data.index, data["tmax"], label="Température Max (°C)")
                     plt.fill_between(data.index, data["tmin"], data["tmax"], alpha=0.1)
