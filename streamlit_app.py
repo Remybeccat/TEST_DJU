@@ -68,26 +68,7 @@ def get_weather_data_hourly(station_id, start, end):
     if df is None:
         return pd.DataFrame()
     return df
-    
-def get_weather_data_hourly_api(station_id, start, end):
-    url = "https://meteostat.p.rapidapi.com/stations/hourly"
-    
-    headers = {
-    	"x-rapidapi-key": "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813",
-    	"x-rapidapi-host": "meteostat.p.rapidapi.com"
-    } 
-    
-    params = {
-        "station": station_id,
-        "start": start.strftime("%Y-%m-%d"),
-        "end": end.strftime("%Y-%m-%d"),
-        "tz":"Europe/Berlin"
-    }
-    r = requests.get(url, headers=headers, params=params)
-   # r.raise_for_status()
-    
-    data = r.json().get("data", [])
-    return pd.DataFrame(data)
+
 # -----------------------------
 # DJU
 # -----------------------------
@@ -149,6 +130,7 @@ if address:
             # Sélection station
             selected_station_name = st.selectbox("Sélectionnez une station :", nearby_stations["name"].tolist())
             selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name, "id"].iloc[0]
+            
             year_max = datetime.date.today().year
             start_date_FR = st.date_input(
                 "Selectionner la date de début",
@@ -169,7 +151,7 @@ if address:
             
             # Données journalières
             with st.spinner("Chargement des données journalières..."):
-                data = get_weather_data_api(selected_station_id, start_date, end_date)
+                data = get_weather_data(selected_station_id, start_date, end_date)
             if not data.empty:
                 st.write(
                     f"Données météos journalières pour la station {selected_station_name} du {start_date_FR} au {end_date_FR}"
@@ -211,7 +193,7 @@ if address:
                 )
             # Données horaires
             with st.spinner("Chargement des données horaires..."):
-                data_hour = get_weather_data_hourly_api(selected_station_id, start_date, end_date_hour)
+                data_hour = get_weather_data_hourly(selected_station_id, start_date, end_date_hour)
             if not data_hour.empty:
                 st.write(
                     f"Données météos horaires pour la station {selected_station_name} du {start_date_FR} au {end_date_FR}"
