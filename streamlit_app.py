@@ -132,10 +132,10 @@ if address:
                 
             else:
                 st.dataframe(nearby_stations)
-            # Sélection station
-            station_dict = dict(zip(nearby_stations["name"], nearby_stations["id"]))
-            selected_station_name = st.selectbox("Sélectionnez une station :", list(station_dict.keys()))
-            selected_station_id = station_dict[selected_station_name]
+            
+            # Sélection station 
+            selected_station_name = st.selectbox("Sélectionnez une station :", nearby_stations["name"].tolist()) 
+            selected_station_id = nearby_stations.loc[nearby_stations["name"] == selected_station_name, "id"].iloc[0]
             
             year_max = datetime.date.today().year
             start_date_FR = st.date_input(
