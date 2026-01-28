@@ -76,7 +76,7 @@ def ensure_stations_db() -> str:
 
 def get_nearby_stations(latitude, longitude):
     POINT = ms.Point(latitude, longitude)
-    stations = ms.stations.nearby(POINT, radius = 300000, limit = 10)
+    stations = ms.stations.nearby(POINT, radius = 300000, limit = 10).fetch
     return stations
 
 # -----------------------------
