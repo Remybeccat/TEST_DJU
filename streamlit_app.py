@@ -75,33 +75,9 @@ def ensure_stations_db() -> str:
     return STATIONS_DB_PATH
 
 def get_nearby_stations(latitude, longitude, limit=5):
-
     POINT = ms.Point(latitude, longitude)
     stations = ms.stations.nearby(POINT, limit=4)
     return stations
-
-
-def get_nearby_stations_api(latitude, longitude, limit=5, radius_km=300):
-
-    url = "https://meteostat.p.rapidapi.com/stations/nearby"
-    
-    headers = {
-    	"x-rapidapi-key": "6c535c0d33msh028047f4f04ffacp1faba2jsna3e3b8329813",
-    	"x-rapidapi-host": "meteostat.p.rapidapi.com"
-    } 
-    
-    params = {
-        "lat": latitude,
-        "lon": longitude,
-        "limit": limit,
-        "radius": radius_km
-    }
-
-    r = requests.get(url, headers=headers, params=params)
-    # r.raise_for_status()
-    
-    data = r.json().get("data", [])
-    return pd.DataFrame(data)
 
 # -----------------------------
 # Meteostat : séries temporelles
@@ -212,7 +188,7 @@ if address:
 
         try:
             with st.spinner("Recherche de stations météo proches..."):
-                nearby_stations = get_nearby_stations_api(lat, lon, limit=10, radius_km=300)
+                nearby_stations = get_nearby_stations(lat, lon, limit=10, radius_km=300)
         except Exception as e:
             st.error(str(e))
             st.text(traceback.format_exc())
