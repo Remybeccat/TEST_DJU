@@ -51,7 +51,7 @@ def haversine(lat1, lon1, lat2, lon2):
 def get_nearby_stations(latitude, longitude):
     POINT = ms.Point(latitude, longitude) 
     stations = ms.stations.nearby(POINT, radius = 300000, limit = 10)
-    stations["distance_km"] = stations["distance"] / 1000
+    stations["distance_km"] = round(stations["distance"] / 1000,2)
     return stations
     
 # -----------------------------
