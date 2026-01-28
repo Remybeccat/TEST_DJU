@@ -52,7 +52,7 @@ def get_nearby_stations(latitude, longitude):
     POINT = ms.Point(latitude, longitude) 
     stations = ms.stations.nearby(POINT, radius = 300000, limit = 10)
     stations["distance_km"] = stations["distance"] / 1000
-    return df
+    return stations
     
 # -----------------------------
 # Meteostat : séries temporelles
