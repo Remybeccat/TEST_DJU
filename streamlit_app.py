@@ -46,26 +46,14 @@ def haversine(lat1, lon1, lat2, lon2):
 # - Filtre en SQL via bounding box (sans acos/cos/sin)
 # - Calcule distances en Python
 # -----------------------------
-STATIONS_DB_URL = "https://data.meteostat.net/stations.db"
-STATIONS_DB_PATH = "/tmp/meteostat_stations.db"
+
 @st.cache_data(show_spinner=False)
-def ensure_stations_db() -> str:
-    """
-    Télécharge stations.db si absent (ou vide) et retourne le chemin local.
-    """
-    os.makedirs(os.path.dirname(STATIONS_DB_PATH), exist_ok=True)
-    needs_download = (not os.path.exists(STATIONS_DB_PATH)) or (os.path.getsize(STATIONS_DB_PATH) < 1024)
-    if needs_download:
-        try:
-            # Téléchargement direct
-            urllib.request.urlretrieve(STATIONS_DB_URL, STATIONS_DB_PATH)
-        except Exception as e:
-            raise RuntimeError(f"Impossible de télécharger stations.db depuis {STATIONS_DB_URL}: {e}")
-    return STATIONS_DB_PATH
+    
 def get_nearby_stations(latitude, longitude):
     POINT = ms.Point(latitude, longitude)
-    stations = ms.stations.nearby(POINT, radius = 300000, limit = 10)
-    return pd.dataframe(stations)
+    df = ms.stations.nearby(POINT, radius = 300000, limit = 10).fetch()
+    return df
+    
 # -----------------------------
 # Meteostat : séries temporelles
 # -----------------------------
@@ -74,6 +62,7 @@ def get_weather_data(station_id, start, end):
     if df is None:
         return pd.DataFrame()
     return df
+    
 def get_weather_data_hourly(station_id, start, end):
     df = ms.hourly(station_id, start, end).fetch()
     if df is None:
