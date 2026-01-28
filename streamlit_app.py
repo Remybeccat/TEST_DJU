@@ -74,9 +74,9 @@ def ensure_stations_db() -> str:
 
     return STATIONS_DB_PATH
 
-def get_nearby_stations(latitude, longitude, limit=5):
+def get_nearby_stations(latitude, longitude, limit):
     POINT = ms.Point(latitude, longitude)
-    stations = ms.stations.nearby(POINT, limit=4)
+    stations = ms.stations.nearby(POINT, limit)
     return stations
 
 # -----------------------------
@@ -188,7 +188,7 @@ if address:
 
         try:
             with st.spinner("Recherche de stations météo proches..."):
-                nearby_stations = get_nearby_stations(lat, lon, limit=10, radius_km=300)
+                nearby_stations = get_nearby_stations(lat, lon, limit=10)
         except Exception as e:
             st.error(str(e))
             st.text(traceback.format_exc())
