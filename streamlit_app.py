@@ -189,7 +189,6 @@ if address:
         try:
             with st.spinner("Recherche de stations météo proches..."):
                 nearby_stations = get_nearby_stations(lat, lon)
-                st.write(nearby_stations)
         except Exception as e:
             st.error(str(e))
             st.text(traceback.format_exc())
