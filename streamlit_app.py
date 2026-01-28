@@ -133,9 +133,9 @@ if address:
             else:
                 st.dataframe(nearby_stations)
             # Sélection station
-            selected_station_name = st.selectbox("Sélectionnez une station :", nearby_stations["name"].tolist())
-            selected_station_id = nearby_stations.loc["name"==selected_station_name]
-            st.write(selected_station_id)
+            station_dict = dict(zip(nearby_stations["name"], nearby_stations["id"]))
+            selected_station_name = st.selectbox("Sélectionnez une station :", list(station_dict.keys()))
+            selected_station_id = station_dict[selected_station_name]
             
             year_max = datetime.date.today().year
             start_date_FR = st.date_input(
