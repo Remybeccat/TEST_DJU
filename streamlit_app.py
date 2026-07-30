@@ -22,44 +22,48 @@ st.set_page_config(
 # Géocodage OpenCage
 # ---------------------------------------------------------
 def get_opencage_api_key():
-    """
-    Recherche la clé dans :
-    1. la variable d'environnement OPENCAGE_API_KEY ;
-    2. le fichier .streamlit/secrets.toml.
-    """
+    # Clé enregistrée dans les secrets Streamlit
+    try:
+        key = st.secrets["OPENCAGE_API_KEY"]
+        if key:
+            return key
+    except (KeyError, FileNotFoundError):
+        pass
+
+    # Alternative : variable d'environnement
     key = os.getenv("OPENCAGE_API_KEY")
     if key:
         return key
 
-    try:
-        return st.secrets["OPENCAGE_API_KEY"]
-    except Exception:
-        return None
+    return None
 
 
-@st.cache_data(show_spinner=False)
 def get_coordinates(address: str):
-    api_key = get_opencage_api_key()
+    key = get_opencage_api_key()
 
-    if not api_key:
-        return None, None, (
-            "Clé OpenCage absente. Ajoutez OPENCAGE_API_KEY dans les variables "
-            "d'environnement ou dans .streamlit/secrets.toml."
+    if not key:
+        st.error(
+            "Clé OpenCage absente. Ajoutez OPENCAGE_API_KEY "
+            "dans les secrets Streamlit."
         )
+        return None, None
 
-    geocoder = OpenCageGeocode(api_key)
+    geocoder = OpenCageGeocode(key)
 
     try:
-        results = geocoder.geocode(address, no_annotations=1, limit=1)
+        results = geocoder.geocode(address)
+
         if results:
             return (
                 results[0]["geometry"]["lat"],
                 results[0]["geometry"]["lng"],
-                None,
             )
-        return None, None, "Adresse non valide ou introuvable."
-    except Exception as exc:
-        return None, None, f"Erreur OpenCage : {exc}"
+
+        return None, None
+
+    except Exception as e:
+        st.error(f"Erreur OpenCage : {e}")
+        return None, None
 
 
 # ---------------------------------------------------------
