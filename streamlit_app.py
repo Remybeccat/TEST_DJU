@@ -21,33 +21,10 @@ st.set_page_config(
 # ---------------------------------------------------------
 # Géocodage OpenCage
 # ---------------------------------------------------------
-def get_opencage_api_key():
-    # Clé enregistrée dans les secrets Streamlit
-    try:
-        key = st.secrets["OPENCAGE_API_KEY"]
-        if key:
-            return key
-    except (KeyError, FileNotFoundError):
-        pass
-
-    # Alternative : variable d'environnement
-    key = os.getenv("OPENCAGE_API_KEY")
-    if key:
-        return key
-
-    return None
-
-
 
 @st.cache_data(show_spinner=False)
 def get_coordinates(address: str):
-    api_key = get_opencage_api_key()
-
-    if not api_key:
-        return None, None, (
-            "Clé OpenCage absente. Ajoutez OPENCAGE_API_KEY dans les variables "
-            "d'environnement ou dans .streamlit/secrets.toml."
-        )
+    api_key = "b9d04993bd4e471ab7a210c42585b523"
 
     geocoder = OpenCageGeocode(api_key)
 
