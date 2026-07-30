@@ -14,8 +14,7 @@ from opencage.geocoder import OpenCageGeocode
 # Configuration
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="Analyse météo et DJU",
-    layout="wide",
+    page_title="Analyse météo et DJU"
 )
 
 
