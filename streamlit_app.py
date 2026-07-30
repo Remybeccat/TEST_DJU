@@ -38,32 +38,30 @@ def get_opencage_api_key():
     return None
 
 
+
+@st.cache_data(show_spinner=False)
 def get_coordinates(address: str):
-    key = get_opencage_api_key()
+    api_key = get_opencage_api_key()
 
-    if not key:
-        st.error(
-            "Clé OpenCage absente. Ajoutez OPENCAGE_API_KEY "
-            "dans les secrets Streamlit."
+    if not api_key:
+        return None, None, (
+            "Clé OpenCage absente. Ajoutez OPENCAGE_API_KEY dans les variables "
+            "d'environnement ou dans .streamlit/secrets.toml."
         )
-        return None, None
 
-    geocoder = OpenCageGeocode(key)
+    geocoder = OpenCageGeocode(api_key)
 
     try:
-        results = geocoder.geocode(address)
-
+        results = geocoder.geocode(address, no_annotations=1, limit=1)
         if results:
             return (
                 results[0]["geometry"]["lat"],
                 results[0]["geometry"]["lng"],
+                None,
             )
-
-        return None, None
-
-    except Exception as e:
-        st.error(f"Erreur OpenCage : {e}")
-        return None, None
+        return None, None, "Adresse non valide ou introuvable."
+    except Exception as exc:
+        return None, None, f"Erreur OpenCage : {exc}"
 
 
 # ---------------------------------------------------------
